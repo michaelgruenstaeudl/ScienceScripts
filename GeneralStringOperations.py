@@ -82,7 +82,7 @@ class afterFind:
         return pos1
 
 
-class removeExtension:
+class remove_extension:
     '''class for returning instring without extension (i.e. ".txt" or ".trees";
        needs instring <a> and delimiter <b> as input '''
     def __init__(self,a,b):
@@ -91,6 +91,15 @@ class removeExtension:
                 
     def go(self):
         return self.instring[:self.instring.rfind(self.delimiter)]
+
+class is_even:
+    '''class for checking if number is even;
+       needs number <a> as input '''
+    def __init__(self,a):
+        self.innumber = a
+
+    def go(self):
+        return self.innumber % 2 == 0
         
 
 ###################
@@ -113,4 +122,8 @@ def replstr(instring,keyword1,keyword2,replacement):
     return replacingStrings(instring,keyword1,keyword2,replacement).go()
 
 def rmext(a):
-    return removeExtension(a,".").go()
+    return remove_extension(a,".").go()
+
+def iseven(a):
+    return is_even(a).go()
+

@@ -26,3 +26,12 @@ is.character0 = function (instring)
 {
   is.character(instring) && length(instring) == 0
 }
+
+# function for returning listcolumn x in a matrix of lists ("ReTurN List Column")
+rtnlc = function (m,x)
+{
+    aFun = function(r,c,m,x) {as.numeric(unlist(strsplit(m[r,c],",")))[x]}
+    vect_aFun = Vectorize(aFun,vectorize.args = c('r','c'))
+    return(outer(1:nrow(m), 1:ncol(m) , FUN = vect_aFun, m, x))
+}
+
