@@ -13,9 +13,9 @@ TITLE="starbeastppsWrapper.sh"
 DESCRIPTION="Shell script that wraps the commands necessary to perform a starBeastPPS analysis in R"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.07.07.1930"
+VERSION="2014.07.11.1700"
 REQUIREMENTS="R, R-package 'starBeastPPS' and its dependencies, Python2"
-USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <xml_infile> <mode_flag(0/1/2/3)> <debug_flag(0/1)>"
+USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <xml_infile> <debug_flag(0/1)>"
 
 ################################################################################
 
@@ -29,15 +29,14 @@ echo ""
 ABS_PATH_TO_INDIR=$1
 ABS_PATH_TO_OUTDIR=$2
 XML_INFILENAME=$3
-MODE_FLAG=$4
-DEBUG_FLAG=$5
+DEBUG_FLAG=$4
 
 # Using Parameter expansion to remove file extension
 INFILE=${XML_INFILENAME%.xml*}
 #DATE=$(date +%Y-%b-%d)
 
 # Checking number of arguments
-if [[ $# != 5 ]]; then
+if [[ $# != 4 ]]; then
 	echo -e " ${red}ERROR: Incorrect number of arguments.${nocolor}"
 	exit
 fi
@@ -73,11 +72,11 @@ cd $ABS_PATH_TO_INDIR
 # Generating R commands
 echo "source('/home/michael/git/osu_eeob_gruenstaeudl/starbeast_Michael/wrapper.R')" > Rcmds.$INFILE.R
 echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME')" >> Rcmds.$INFILE.R
-echo "warnings()" >> Rcmds.$INFILE.R
+#echo "warnings()" >> Rcmds.$INFILE.R
 echo "q()" >> Rcmds.$INFILE.R
 
 # Executing commands in R with command args
-Rscript Rcmds.$INFILE.R $MODE_FLAG $DEBUG_FLAG
+Rscript Rcmds.$INFILE.R $DEBUG_FLAG
 
 ################################################################################
 

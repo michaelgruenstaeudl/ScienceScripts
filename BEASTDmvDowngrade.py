@@ -39,7 +39,7 @@ def main():
                     cntr =+ 1
             #outd.append(GSO.csplit(line,"[")[-1])
     #print(outd)
-    outf = open(GSO.rmext(sys.argv[1])+".mod.tre","w")
+    outf = open(GSO.rmext(sys.argv[1])+".mod.trees","w")
     outf.write(''.join(outd)) # Do not '\n'.join
     outf.close()
 
