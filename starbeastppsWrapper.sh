@@ -82,7 +82,7 @@ Rscript Rcmds.$INFILE.R $DEBUG_FLAG
 
 # STEP 3: File hygiene
 mv $INFILE.PRMT $INFILE.RSLT $ABS_PATH_TO_OUTDIR/
-rm Rcmds.$INFILE.R *.tmp
+rm Rcmds.$INFILE.R
 cd ~
 #tar czf ${ABS_PATH_TO_INDIR:0:-1}.tar.gz $ABS_PATH_TO_INDIR
 
