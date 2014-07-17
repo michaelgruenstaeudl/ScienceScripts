@@ -1,0 +1,4 @@
+	<coalescentSimulator id="gene_NN.startingTree">
+		<taxa idref="taxa"/>
+		<constantSize idref="constant"/>
+	</coalescentSimulator>

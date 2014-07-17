@@ -1,0 +1,19 @@
+	<HKYModel id="gene_NN.hky">
+		<frequencies>
+			<frequencyModel dataType="nucleotide">
+				<frequencies>
+					<parameter id="gene_NN.frequencies" value="0.3 0.2 0.2 0.3"/>
+				</frequencies>
+			</frequencyModel>
+		</frequencies>
+		<kappa>
+			<parameter id="gene_NN.kappa" value="3.0" lower="0.0"/>
+		</kappa>
+	</HKYModel>
+
+	<!-- site model                                                              -->
+	<siteModel id="gene_NN.siteModel">
+		<substitutionModel>
+			<HKYModel idref="gene_NN.hky"/>
+		</substitutionModel>
+	</siteModel>

@@ -1,0 +1,75 @@
+	</taxa>
+
+
+
+	<!-- Species Tree: Provides Per branch demographic function                  -->
+	<speciesTree id="sptree" constantRoot="true">
+		<species idref="species"/>
+		<sppSplitPopulations value="0.0043">
+			<parameter id="speciesTree.splitPopSize"/>
+		</sppSplitPopulations>
+	</speciesTree>
+
+	<!-- Species tree prior: Yule Model                                          -->
+	<yuleModel id="yule" units="substitutions">
+		<birthRate>
+			<parameter id="species.yule.birthRate" value="1.0" lower="0.0"/>
+		</birthRate>
+	</yuleModel>
+
+	<!-- Species Tree Likelihood: Yule Model                                     -->
+	<speciationLikelihood id="speciation.likelihood">
+		<model>
+			<yuleModel idref="yule"/>
+		</model>
+		<speciesTree>
+			<speciesTree idref="sptree"/>
+		</speciesTree>
+	</speciationLikelihood>
+
+	<!-- Species Tree: tmrcaStatistic                                            -->
+	<tmrcaStatistic id="speciesTree.rootHeight" name="speciesTree.rootHeight">
+		<speciesTree idref="sptree"/>
+		<mrca>
+			<taxa idref="allSpecies"/>
+		</mrca>
+	</tmrcaStatistic>
+
+	<!-- Species Tree: Coalescent likelihood for gene trees under species tree   -->
+	<speciesCoalescent id="species.coalescent">
+		<species idref="species"/>
+		<speciesTree idref="sptree"/>
+	</speciesCoalescent>
+
+	<!-- Species tree prior: gama2 + gamma4                                      -->
+	<mixedDistributionLikelihood id="species.popSizesLikelihood">
+		<distribution0>
+			<gammaDistributionModel>
+				<shape>
+					2
+				</shape>
+				<scale>
+					<parameter id="species.popMean" value="1.0" lower="0.0"/>
+				</scale>
+			</gammaDistributionModel>
+		</distribution0>
+		<distribution1>
+			<gammaDistributionModel>
+				<shape>
+					4
+				</shape>
+				<scale>
+					<parameter idref="species.popMean"/>
+				</scale>
+			</gammaDistributionModel>
+		</distribution1>
+		<data>
+			<parameter idref="speciesTree.splitPopSize"/>
+		</data>
+		<indicators>
+			<parameter value="1 1 1 1 0 0 0 0 0 0"/>
+		</indicators>
+	</mixedDistributionLikelihood>
+
+	<!-- Define operators                                                        -->
+	<operators id="operators" optimizationSchedule="default">

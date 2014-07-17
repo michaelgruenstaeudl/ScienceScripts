@@ -1,0 +1,2 @@
+			<parameter idref="gene_NN.kappa"/>
+			<parameter idref="gene_NN.frequencies"/>

@@ -1,0 +1,3 @@
+				<exponentialPrior mean="0.3333333333333333" offset="0.0">
+					<parameter idref="gene_NN.ucld.stdev"/>
+				</exponentialPrior>

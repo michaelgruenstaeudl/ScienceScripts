@@ -1,0 +1,8 @@
+    <coalescentLikelihood id="coalescent">
+        <model>
+            <constantSize idref="constant"/>
+        </model>
+        <populationTree>
+            <treeModel idref="treeModel"/>
+        </populationTree>
+    </coalescentLikelihood>

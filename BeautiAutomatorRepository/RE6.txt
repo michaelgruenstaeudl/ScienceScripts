@@ -1,0 +1,6 @@
+	<treeLikelihood id="gene_NN.treeLikelihood" useAmbiguities="false">
+		<patterns idref="gene_NN.patterns"/>
+		<treeModel idref="gene_NN.treeModel"/>
+		<siteModel idref="gene_NN.siteModel"/>
+		<discretizedBranchRates idref="gene_NN.branchRates"/>
+	</treeLikelihood>

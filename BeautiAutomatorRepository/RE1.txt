@@ -1,0 +1,3 @@
+	<patterns id="gene_NN.patterns" from="1" strip="false">
+		<alignment idref="alignmentNN"/>
+	</patterns>

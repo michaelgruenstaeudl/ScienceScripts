@@ -1,0 +1,8 @@
+		<upDownOperator scaleFactor="0.75" weight="30">
+			<up>
+				<parameter idref="species.yule.birthRate"/>
+			</up>
+			<down>
+				<speciesTree idref="sptree"/>
+				<parameter idref="species.popMean"/>
+				<parameter idref="speciesTree.splitPopSize"/>

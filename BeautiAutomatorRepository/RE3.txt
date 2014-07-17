@@ -1,0 +1,12 @@
+	<treeModel id="gene_NN.treeModel">
+		<coalescentTree idref="gene_NN.startingTree"/>
+		<rootHeight>
+			<parameter id="gene_NN.treeModel.rootHeight"/>
+		</rootHeight>
+		<nodeHeights internalNodes="true">
+			<parameter id="gene_NN.treeModel.internalNodeHeights"/>
+		</nodeHeights>
+		<nodeHeights internalNodes="true" rootNode="true">
+			<parameter id="gene_NN.treeModel.allInternalNodeHeights"/>
+		</nodeHeights>
+	</treeModel>

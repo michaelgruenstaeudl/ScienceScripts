@@ -1,0 +1,23 @@
+		<scaleOperator scaleFactor="0.9" weight="5">
+			<parameter idref="species.popMean"/>
+		</scaleOperator>
+		<scaleOperator scaleFactor="0.75" weight="3">
+			<parameter idref="species.yule.birthRate"/>
+		</scaleOperator>
+		<scaleOperator scaleFactor="0.5" weight="94">
+			<parameter idref="speciesTree.splitPopSize"/>
+		</scaleOperator>
+		<nodeReHeight weight="94">
+			<species idref="species"/>
+			<speciesTree idref="sptree"/>
+		</nodeReHeight>
+	</operators>
+
+
+	<!-- Define MCMC                                                             -->
+	<mcmc id="mcmc" chainLength="200000" autoOptimize="true" operatorAnalysis="FILENAME.ops">
+		<posterior id="posterior">
+			<prior id="prior">
+				<speciesCoalescent idref="species.coalescent"/>
+				<mixedDistributionLikelihood idref="species.popSizesLikelihood"/>
+				<speciationLikelihood idref="speciation.likelihood"/>

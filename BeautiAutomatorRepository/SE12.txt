@@ -1,0 +1,17 @@
+			</likelihood>
+		</posterior>
+		<operators idref="operators"/>
+
+		<log id="screenLog" logEvery="20000">
+			<column label="Posterior" dp="4" width="12">
+				<posterior idref="posterior"/>
+			</column>
+			<column label="Prior" dp="4" width="12">
+				<prior idref="prior"/>
+			</column>
+			<column label="Likelihood" dp="4" width="12">
+				<likelihood idref="likelihood"/>
+			</column>
+			<column label="PopMean" dp="4" width="12">
+				<parameter idref="species.popMean"/>
+			</column>

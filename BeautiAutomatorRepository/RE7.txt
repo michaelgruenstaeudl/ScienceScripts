@@ -1,0 +1,3 @@
+            <gtree ploidy="2.0">
+			    <treeModel idref="gene_NN.treeModel"/>
+            </gtree>

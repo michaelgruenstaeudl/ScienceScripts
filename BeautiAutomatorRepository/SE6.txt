@@ -1,0 +1,5 @@
+		</geneTrees>
+	</species>
+
+
+	<taxa id="allSpecies">

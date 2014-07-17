@@ -1,0 +1,18 @@
+		<subtreeSlide size="3.7E-4" gaussian="true" weight="15">
+			<treeModel idref="gene_NN.treeModel"/>
+		</subtreeSlide>
+		<narrowExchange weight="15">
+			<treeModel idref="gene_NN.treeModel"/>
+		</narrowExchange>
+		<wideExchange weight="3">
+			<treeModel idref="gene_NN.treeModel"/>
+		</wideExchange>
+		<wilsonBalding weight="3">
+			<treeModel idref="gene_NN.treeModel"/>
+		</wilsonBalding>
+		<scaleOperator scaleFactor="0.75" weight="3">
+			<parameter idref="gene_NN.treeModel.rootHeight"/>
+		</scaleOperator>
+		<uniformOperator weight="30">
+			<parameter idref="gene_NN.treeModel.internalNodeHeights"/>
+		</uniformOperator>

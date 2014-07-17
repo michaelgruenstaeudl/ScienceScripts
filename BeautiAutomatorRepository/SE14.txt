@@ -1,0 +1,7 @@
+		</log>
+
+
+		<logTree id="species.treeFileLog" logEvery="20000" nexusFormat="true" fileName="FILENAME.species.trees" sortTranslationTable="true">
+			<speciesTree idref="sptree"/>
+			<posterior idref="posterior"/>
+		</logTree>

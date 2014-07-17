@@ -1,0 +1,3 @@
+			<rateStatistic idref="gene_NN.meanRate"/>
+			<rateStatistic idref="gene_NN.coefficientOfVariation"/>
+			<rateCovarianceStatistic idref="gene_NN.covariance"/>

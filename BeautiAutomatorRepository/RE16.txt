@@ -1,0 +1,3 @@
+			<column label="gene_NN.rootHeight" sf="6" width="12">
+				<parameter idref="gene_NN.treeModel.rootHeight"/>
+			</column>

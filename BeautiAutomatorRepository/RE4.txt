@@ -1,0 +1,28 @@
+	<discretizedBranchRates id="gene_NN.branchRates">
+		<treeModel idref="gene_NN.treeModel"/>
+		<distribution>
+			<logNormalDistributionModel meanInRealSpace="true">
+				<mean>
+					<parameter id="gene_NN.ucld.mean" value="1.0"/>
+				</mean>
+				<stdev>
+					<parameter id="gene_NN.ucld.stdev" value="0.3333333333333333" lower="0.0"/>
+				</stdev>
+			</logNormalDistributionModel>
+		</distribution>
+		<rateCategories>
+			<parameter id="gene_NN.branchRates.categories"/>
+		</rateCategories>
+	</discretizedBranchRates>
+	<rateStatistic id="gene_NN.meanRate" name="gene_NN.meanRate" mode="mean" internal="true" external="true">
+		<treeModel idref="gene_NN.treeModel"/>
+		<discretizedBranchRates idref="gene_NN.branchRates"/>
+	</rateStatistic>
+	<rateStatistic id="gene_NN.coefficientOfVariation" name="gene_NN.coefficientOfVariation" mode="coefficientOfVariation" internal="true" external="true">
+		<treeModel idref="gene_NN.treeModel"/>
+		<discretizedBranchRates idref="gene_NN.branchRates"/>
+	</rateStatistic>
+	<rateCovarianceStatistic id="gene_NN.covariance" name="gene_NN.covariance">
+		<treeModel idref="gene_NN.treeModel"/>
+		<discretizedBranchRates idref="gene_NN.branchRates"/>
+	</rateCovarianceStatistic>

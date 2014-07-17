@@ -1,0 +1,14 @@
+		</log>
+
+
+		<log id="fileLog" logEvery="20000" fileName="FILENAME.log" overwrite="false">
+			<posterior idref="posterior"/>
+			<prior idref="prior"/>
+			<likelihood idref="likelihood"/>
+			<speciesCoalescent idref="species.coalescent"/>
+			<mixedDistributionLikelihood idref="species.popSizesLikelihood"/>
+			<speciationLikelihood idref="speciation.likelihood"/>
+			<parameter idref="species.popMean"/>
+			<parameter idref="speciesTree.splitPopSize"/>
+			<parameter idref="species.yule.birthRate"/>
+			<tmrcaStatistic idref="speciesTree.rootHeight"/>

@@ -1,0 +1,13 @@
+		<upDownOperator scaleFactor="0.75" weight="3">
+			<up>
+			</up>
+			<down>
+				<parameter idref="gene_NN.treeModel.allInternalNodeHeights"/>
+			</down>
+		</upDownOperator>
+		<swapOperator size="1" weight="10" autoOptimize="false">
+			<parameter idref="gene_NN.branchRates.categories"/>
+		</swapOperator>
+		<uniformIntegerOperator weight="10">
+			<parameter idref="gene_NN.branchRates.categories"/>
+		</uniformIntegerOperator>
