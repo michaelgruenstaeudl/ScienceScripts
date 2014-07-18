@@ -2,7 +2,7 @@
 """Beauti-Automator: Batch Generation of XML Input Files for BEAST and *BEAST."""
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.06.12.0430"
+__version__ = "2014.07.18.1700"
 __status__ = "Working"
 
 #########################
@@ -10,6 +10,7 @@ __status__ = "Working"
 #########################
 
 import argparse, collections, re, sys
+import xml.etree.ElementTree as ET
 from Bio import SeqIO
 from cStringIO import StringIO
 from progress.bar import Bar
@@ -21,7 +22,50 @@ from termcolor import colored
 
 glob_dict = {   "a": "pop1", "b": "pop2", "c": "pop3", "d": "pop4", "e": "pop5", "f": "pop6", 
                 "g": "pop7", "h": "pop7", "i": "pop8", "o": "out4"  }
-psd = "/home/michael/git/ScienceScripts/"                                       # Path to script directory
+
+###############
+### CLASSES ###
+###############
+
+# CURRENTLY NOT USED:
+#class XMLgenerator:
+#    def __init__(self):
+#        self.tree = ET.ElementTree()
+#
+#    def get_str(self):
+#        return self.tree.to_str()
+#
+#    def get_tree(self):
+#        return self.tree
+
+class XMLtaglist(object):
+    def __init__(self):
+        self.tags = []
+
+    def fromdict(self, valOf):
+        self.tags = [self.build_node(key, valOf[key]) for key in valOf]
+
+    def get_str(self):
+        return "\n".join([ET.tostring(el) for el in self.tags])
+
+    def get_list(self):
+        return self.tags
+
+
+class OT1aGenerator(XMLtaglist):
+    def __init__(self, mydict):
+        super(OT1aGenerator, self).__init__()
+        self.fromdict(mydict)
+
+    #Example: <taxon id="b26"><attr name="species">pop2</attr></taxon>
+
+    def build_node(self, key, val):
+        el = ET.Element("taxon")                # Generates: <taxon >
+        subel = ET.SubElement(el, "attr")       # Generates: <attr >
+        subel.set("name", "species")            # Generates: name="species"
+        subel.text = glob_dict[key[0]]          # Generates: pop2
+        el.set("id", key)                       # Generates: id="b26"
+        return el
 
 ###################
 ### DEFINITIONS ###
@@ -34,9 +78,10 @@ def generate_AR1(mode,counter,mydict):
     if mode == "2":
         return '\t<alignment id="alignment'+str(counter)+'" dataType="nucleotide">\n'+'\n'.join(outlist)+'\n\t</alignment>\n'
 
-def generate_OT1a(mydict):
-    outlist = ['\t\t<taxon id="'+key+'"><attr name="species">'+glob_dict[key[0]]+'</attr></taxon>' for key in mydict]
-    return '\n'.join(outlist)
+# LEGACYCODE:
+#def generate_OT1a(mydict):
+#    outlist = ['\t\t<taxon id="'+key+'"><attr name="species">'+glob_dict[key[0]]+'</attr></taxon>' for key in mydict]
+#    return '\n'.join(outlist)
 
 def generate_OT1b(mydict):
     outlist = ['\t\t<taxon id="'+key+'"/>' for key in mydict]
@@ -65,96 +110,6 @@ def generate_RE(mode, counter, pwd, fileprefix):
 
 def splitkeepsep(astring, sep):                                                 # splits a string by separator, but keeps separator; inspired by http://programmaticallyspeaking.com/
     return reduce(lambda acc, elem: acc + [elem] if elem == sep else acc[:-1] + [acc[-1] + elem], re.split("(%s)" % re.escape(sep), astring)[1:], [])
-
-############
-### MAIN ###
-############
-
-def main(mode, pwd, infilename, generations, options):
-
-    logEvery = str(int(generations)/2000)                                       # setting up logEvery for *BEAST
-    if logEvery < 1:
-        logEvery = 1
-
-    infile = open(pwd+infilename).read()
-
-    if infile.count("#NEXUS") > 1:                                              # if infile contains multiple instances of "#NEXUS"
-        alist = splitkeepsep(infile, "#NEXUS")                                  # split these instances, but keep the seperator (i.e. "#NEXUS")
-        alist = filter(None,alist)                                              # remove all empty list elements
-    else:
-        alist = [infile]                                                        # else, create a list with just one element
-
-    mylists = collections.defaultdict(list)                                     # initialization with a default dictionary
-
-    if mode == "1":
-        print "  Selected mode:",colored("BEAST","magenta")
-        if options == "1":
-            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
-        bar = Bar('  Generating XML files', max=len(alist))
-        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
-            handle = StringIO(element)                                          # convert string to file object
-            mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
-            filename = infilename[:-4]+".GeneTree.gene"+str(nexuscounter)
-
-        # Loading Alignment Repeating (AR) elements; inside the loop
-            mylists["AR1"] = generate_AR1(mode,nexuscounter, mydict)
-
-        # Loading Repeating elements (RE); inside the loop
-            for REnumber in range(1,24):
-                mylists["RE"+str(REnumber)] = generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber))
-
-        # Loading Stationary elements (SE)
-            for SEnumber in range(1,16):
-                mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
-
-            for SPnumber in range(1,4):
-                mylists["SP"+str(SPnumber)] = open(psd+"BeautiAutomatorRepository/"+"SP"+str(SPnumber)+".txt").read()
-
-        # Loading Marginal likelihood elements (MLE)
-            mylists["MLE"] = open(psd+"BeautiAutomatorRepository/"+"MLE.txt").read()
-
-            results = generateBEAST(mydict, mylists, filename, generations, logEvery, options)
-
-            outfile = open(pwd+filename+".xml","w")
-            outfile.write(results)                                              # outfile INSIDE the nexuscounter-loop
-            outfile.close()
-            bar.next()
-        bar.finish()
-
-
-    if mode == "2":
-        print "  Selected mode:",colored("starBEAST","magenta")
-        if options == "1":
-            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
-        bar = Bar("  Generating XML files", max=len(alist))
-        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
-            handle = StringIO(element)                                          # convert string to file object
-            mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
-            
-        # Loading Alignment Repeating (AR) elements; inside the loop
-            mylists["AR1"].append(generate_AR1(mode,nexuscounter, mydict))
-
-        # Loading Repeating elements (RE); inside the loop
-            for REnumber in range(1,24):
-                mylists["RE"+str(REnumber)].append(generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber)))
-
-            bar.next()
-
-        # Loading Stationary elements (SE); outside the loop
-        for SEnumber in range(1,16):                                            # must not be in for-loop from above
-            mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
-
-        # Loading Marginal likelihood elements (MLE); outside the loop
-        mylists["MLE"] = open(psd+"BeautiAutomatorRepository/"+"MLE.txt").read()
-
-        filename = infilename[:-4]+".SpeciesTree"                               # for starBeast, gene number is not part of the
-        results = generateStarBEAST(mydict, mylists, filename, generations, logEvery, options)
-
-        outfile = open(pwd+filename+".xml","w")                                 # outfile OUTSIDE the nexuscounter-loop
-        outfile.write(results)
-        outfile.close()
-        bar.finish()
-
 
 def generateBEAST(mydict, mylists, infilename, generations, logEvery, options):
 
@@ -241,7 +196,9 @@ def generateBEAST(mydict, mylists, infilename, generations, logEvery, options):
 def generateStarBEAST(mydict, mylists, infilename, generations, logEvery, options):
 
     # Loading One-Time (OT) elements; outside the loop
-    mylists["OT1a"] = generate_OT1a(mydict)
+    #mylists["OT1a"] = generate_OT1a(mydict)
+    mylists["OT1a"] = OT1aGenerator(mydict).get_str()   # Only relevant for starBeast (i.e. species tree)
+    
     mylists["OT2"] = generate_OT2(mydict)
     mylists["OT3"] = generate_OT3(mydict)
 
@@ -314,6 +271,93 @@ def generateStarBEAST(mydict, mylists, infilename, generations, logEvery, option
         results = results + mylists["MLE"]
 
     return results
+
+############
+### MAIN ###
+############
+
+def main(mode, pwd, infilename, generations, options):
+
+    logEvery = str(int(generations)/100)                                        # setting up logEvery for *BEAST
+
+    infile = open(pwd+infilename).read()
+
+    if infile.count("#NEXUS") > 1:                                              # if infile contains multiple instances of "#NEXUS"
+        alist = splitkeepsep(infile, "#NEXUS")                                  # split these instances, but keep the seperator (i.e. "#NEXUS")
+        alist = filter(None,alist)                                              # remove all empty list elements
+    else:
+        alist = [infile]                                                        # else, create a list with just one element
+
+    mylists = collections.defaultdict(list)                                     # initialization with a default dictionary
+
+    if mode == "1":
+        print "  Selected mode:",colored("BEAST","magenta")
+        if options == "1":
+            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
+        bar = Bar('  Generating XML files', max=len(alist))
+        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
+            handle = StringIO(element)                                          # convert string to file object
+            mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
+            filename = infilename[:-4]+".GeneTree.gene"+str(nexuscounter)
+
+        # Loading Alignment Repeating (AR) elements; inside the loop
+            mylists["AR1"] = generate_AR1(mode,nexuscounter, mydict)
+
+        # Loading Repeating elements (RE); inside the loop
+            for REnumber in range(1,24):
+                mylists["RE"+str(REnumber)] = generate_RE(mode, nexuscounter, pwd+"BeautiAutomatorRepository/", "RE"+str(REnumber))
+
+        # Loading Stationary elements (SE)
+            for SEnumber in range(1,16):
+                mylists["SE"+str(SEnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
+
+            for SPnumber in range(1,4):
+                mylists["SP"+str(SPnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SP"+str(SPnumber)+".txt").read()
+
+        # Loading Marginal likelihood elements (MLE)
+            mylists["MLE"] = open(pwd+"BeautiAutomatorRepository/"+"MLE.txt").read()
+
+            results = generateBEAST(mydict, mylists, filename, generations, logEvery, options)
+
+            outfile = open(pwd+filename+".xml","w")
+            outfile.write(results)                                              # outfile INSIDE the nexuscounter-loop
+            outfile.close()
+            bar.next()
+        bar.finish()
+
+
+    if mode == "2":
+        print "  Selected mode:",colored("starBEAST","magenta")
+        if options == "1":
+            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
+        bar = Bar("  Generating XML files", max=len(alist))
+        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
+            handle = StringIO(element)                                          # convert string to file object
+            mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
+            
+        # Loading Alignment Repeating (AR) elements; inside the loop
+            mylists["AR1"].append(generate_AR1(mode,nexuscounter, mydict))
+
+        # Loading Repeating elements (RE); inside the loop
+            for REnumber in range(1,24):
+                mylists["RE"+str(REnumber)].append(generate_RE(mode, nexuscounter, pwd+"BeautiAutomatorRepository/", "RE"+str(REnumber)))
+
+            bar.next()
+
+        # Loading Stationary elements (SE); outside the loop
+        for SEnumber in range(1,16):                                            # must not be in for-loop from above
+            mylists["SE"+str(SEnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
+
+        # Loading Marginal likelihood elements (MLE); outside the loop
+        mylists["MLE"] = open(pwd+"BeautiAutomatorRepository/"+"MLE.txt").read()
+
+        filename = infilename[:-4]+".SpeciesTree"                               # for starBeast, gene number is not part of the
+        results = generateStarBEAST(mydict, mylists, filename, generations, logEvery, options)
+
+        outfile = open(pwd+filename+".xml","w")                                 # outfile OUTSIDE the nexuscounter-loop
+        outfile.write(results)
+        outfile.close()
+        bar.finish()
 
 ###############
 ### EXECUTE ###
