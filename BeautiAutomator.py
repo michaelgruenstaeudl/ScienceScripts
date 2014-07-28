@@ -23,6 +23,9 @@ from termcolor import colored
 glob_dict = {   "a": "pop1", "b": "pop2", "c": "pop3", "d": "pop4", "e": "pop5", "f": "pop6", 
                 "g": "pop7", "h": "pop7", "i": "pop8", "o": "out4"  }
 
+# Path to script directory
+psd = "/home/michael/git/ScienceScripts/"
+
 ###############
 ### CLASSES ###
 ###############
@@ -305,17 +308,17 @@ def main(mode, pwd, infilename, generations, options):
 
         # Loading Repeating elements (RE); inside the loop
             for REnumber in range(1,24):
-                mylists["RE"+str(REnumber)] = generate_RE(mode, nexuscounter, pwd+"BeautiAutomatorRepository/", "RE"+str(REnumber))
+                mylists["RE"+str(REnumber)] = generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber))
 
         # Loading Stationary elements (SE)
             for SEnumber in range(1,16):
-                mylists["SE"+str(SEnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
+                mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
 
             for SPnumber in range(1,4):
-                mylists["SP"+str(SPnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SP"+str(SPnumber)+".txt").read()
+                mylists["SP"+str(SPnumber)] = open(psd+"BeautiAutomatorRepository/"+"SP"+str(SPnumber)+".txt").read()
 
         # Loading Marginal likelihood elements (MLE)
-            mylists["MLE"] = open(pwd+"BeautiAutomatorRepository/"+"MLE.txt").read()
+            mylists["MLE"] = open(psd+"BeautiAutomatorRepository/"+"MLE.txt").read()
 
             results = generateBEAST(mydict, mylists, filename, generations, logEvery, options)
 
@@ -340,16 +343,16 @@ def main(mode, pwd, infilename, generations, options):
 
         # Loading Repeating elements (RE); inside the loop
             for REnumber in range(1,24):
-                mylists["RE"+str(REnumber)].append(generate_RE(mode, nexuscounter, pwd+"BeautiAutomatorRepository/", "RE"+str(REnumber)))
+                mylists["RE"+str(REnumber)].append(generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber)))
 
             bar.next()
 
         # Loading Stationary elements (SE); outside the loop
         for SEnumber in range(1,16):                                            # must not be in for-loop from above
-            mylists["SE"+str(SEnumber)] = open(pwd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
+            mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
 
         # Loading Marginal likelihood elements (MLE); outside the loop
-        mylists["MLE"] = open(pwd+"BeautiAutomatorRepository/"+"MLE.txt").read()
+        mylists["MLE"] = open(psd+"BeautiAutomatorRepository/"+"MLE.txt").read()
 
         filename = infilename[:-4]+".SpeciesTree"                               # for starBeast, gene number is not part of the
         results = generateStarBEAST(mydict, mylists, filename, generations, logEvery, options)
