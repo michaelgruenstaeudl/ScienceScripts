@@ -16,7 +16,7 @@ import sys
 print("I require left-ladderizied trees.")
 
 if len(sys.argv) < 2:
-    print("python hybridLambdaPrep.py inputfile")
+    print("python hybridLambdaMaker.py inputfile")
     sys.exit()
 
 inf = open(sys.argv[1], "r")
