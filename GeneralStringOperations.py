@@ -33,11 +33,15 @@ class ExciseString:
         return self.instring[pos1:pos2]
         
 class ReplaceString:
-    ''' Replaces string via keyword delimitation.
+    ''' Replaces a string via keyword delimitation.
     Args:
-        instring <a>, keyword1 <b>, keyword2 <c>
+        instring <a>, keyword1 <b>, keyword2 <c>, replacement <d>
     Returns:
-        output
+        original string containing replacement(s)
+    Note:
+        currently requires that keywords are only found once;
+        otherwise use TFL: 
+        return self.instring.replace(self.instring[pos1:pos2],self.replacement)
     '''
        
     def __init__(self,a,b,c,d):
@@ -49,12 +53,14 @@ class ReplaceString:
     def go(self):
         pos1 = AfterFind(self.instring,self.keyword1).go()
         pos2 = self.instring.find(self.keyword2,pos1)
-        if self.instring[pos1:pos2]:
-            output = self.instring.replace(self.instring[pos1:pos2],self.replacement)
-        # If string to be replaced were empty:
-        if not self.instring[pos1:pos2]:
-            output = self.instring[:pos1]+self.replacement+self.instring[pos2:]
-        return output
+        return self.instring[:pos1]+self.replacement+self.instring[pos2:]
+# Legacycode:
+#        if self.instring[pos1:pos2]:
+#            output = self.instring.replace(self.instring[pos1:pos2],self.replacement)
+#        # If string to be replaced were empty:
+#        if not self.instring[pos1:pos2]:
+#            output = self.instring[:pos1]+self.replacement+self.instring[pos2:]
+#        return output
 
 class generatingRelativeValues:
     '''class for generating relative values from a list of absolute values;
@@ -84,7 +90,7 @@ class ClearSplit:
     def go(self):
         splitList = self.instring.split(self.delimiter)
         if len(splitList) < 2:
-            print "*** Error in "+self.__class__.__name___
+            print "*** Error in "+self.__class__.__name__
             print "*** Less than two elements after split."
         outlist = [] 
         if len(splitList) == 2:
