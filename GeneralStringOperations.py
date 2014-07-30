@@ -28,7 +28,7 @@ class ExciseString:
         self.keyword2 = c           # string
         
     def go(self):
-        pos1 = afterFind(self.instring,self.keyword1).go()
+        pos1 = AfterFind(self.instring,self.keyword1).go()
         pos2 = self.instring.find(self.keyword2,pos1)
         return self.instring[pos1:pos2]
         
@@ -47,7 +47,7 @@ class ReplaceString:
         self.replacement = d        # string
         
     def go(self):
-        pos1 = afterFind(self.instring,self.keyword1).go()
+        pos1 = AfterFind(self.instring,self.keyword1).go()
         pos2 = self.instring.find(self.keyword2,pos1)
         if self.instring[pos1:pos2]:
             output = self.instring.replace(self.instring[pos1:pos2],self.replacement)
@@ -85,11 +85,12 @@ class ClearSplit:
         splitList = self.instring.split(self.delimiter)
         if len(splitList) < 2:
             print "*** Error in "+self.__class__.__name___
-            print "*** Less than two elements after split." 
+            print "*** Less than two elements after split."
+        outlist = [] 
         if len(splitList) == 2:
-            if !rightflag:
+            if not self.rightflag:
                 outlist = [splitList[0]+self.delimiter, splitList[1]]
-            if rightflag:            
+            if self.rightflag:            
                 outlist = [splitList[0], self.delimiter+splitList[1]]
 #        else:
 #            outlist = []
@@ -161,7 +162,7 @@ def GenerateRelValues(inlist):
 def afind(instring,keyword):
     return AfterFind(instring,keyword).go()
 
-def csplit(instring,delimiter,rightflag=F):
+def csplit(instring,delimiter,rightflag=False):
     return ClearSplit(instring,delimiter,rightflag).go()
 
 def exstr(instring,keyword1,keyword2):

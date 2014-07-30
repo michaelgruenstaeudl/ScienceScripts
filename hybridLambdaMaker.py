@@ -42,13 +42,13 @@ def main(treeName, parentInfo):
 
     # Parsing parentInfo into dictionary
     aDict = {}
-    for i in parentInfo.split(";"):
-        aDict[i.split(",")[0]] = i.split(",")[1]
+    for i in parentInfo.split(","):
+        aDict[i.split(":")[0]] = i.split(":")[1]
     # Hypothetical content of aDict at this point:
     #    {"B":"0.6", "C":"0.4"}
 
     # Adding hybrid information to intree
-    addHybrInfo(intree, hybInfoDict)
+    addHybInfo(tree, aDict)
 #    tree = addHybrInfo(intree, hybInfoDict)
 
     # Adding nodes to tree
@@ -59,12 +59,12 @@ def main(treeName, parentInfo):
 #    outf.write(''.join(outd))
 
 
-def addHybrInfo(intree, hybInfoDict):
+def addHybInfo(intree, hybInfo):
     ''' Adds hybrid information to tree string in accordance with the 
         requirements of hybrid-Lambda.
     Args:
         intree: a tree string without hybrid info.
-        hybInfoDict: dictionary with hybrid parent info of format {"B":"0.6", "C":"0.4"}
+        hybInfo: a dictionary with hybrid parent info of format {"B":"0.6", "C":"0.4"}
 
     Returns:
         outtree: a tree string with hybrid info.
@@ -73,24 +73,27 @@ def addHybrInfo(intree, hybInfoDict):
     outtree = []
     # Looping over the input taxa and incorporating the hyrbid info for each 
     # taxon in list
-    for key,val in hybInfoDict.iteritems():
+    for key,val in hybInfo.iteritems():
 
         # 1. Replace parent's brlen with adjusted brlen
         if not intree.find(key):
-            print colored("  Error: Specified hybrid parent not found in \
-input tree.", 'red')
-            break()
+            print colored("  Error: Specified hybrid parent not found in input tree.", 'red')
+            break
         else:
             # Parse out the branch length immediately following the key, 
-            # save as "brlen"
-            brlen = float(GSO.exstr(intree,key+":",")"))
-            # Replace said branch length with half of value
-            intree = GSO.replstr(intree,key+":",")",str(brlen*0.5))
+            # save as "brlen"; then replace said branch length with
+            # half of value
+            try:
+                brlen = float(GSO.exstr(intree,key+":",")"))
+                intree = GSO.replstr(intree,key+":",")",str(brlen*0.1))
+            except ValueError:
+                brlen = float(GSO.exstr(intree,key+":",","))
+                intree = GSO.replstr(intree,key+":",",",str(brlen*0.5))
 
         # 2. Add hybrid info to parent
         # Split intree into three sections
-        split1 = GSO.csplit(intree,key,rightflag=T)
-        aList = [split1[0], GSO.csplit(split1[1],key+":"+str(brlen*0.5),rightflag=F)
+        split1 = GSO.csplit(intree,key,rightflag=True)
+        aList = [split1[0]] + GSO.csplit(split1[1],key+":"+str(brlen*0.5),rightflag=False)
         print aList
 
     ## add [open parenthesis "(" + "h#" + hybr. prob. + colon + 1/2brlen + comma] to infstr.find(c)-1
@@ -111,10 +114,10 @@ print ""
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Converting a left-ladderized phylogenetic tree into input for Hybrid-Lambda; '+__copyright__)
     parser.add_argument('-t','--tree', help='name of input tree (left-ladderized!)', default="infile.tre", required=True)
-    parser.add_argument('-p','--parents', help='info on parental taxa; format: <parent1>,<likelih.parent1>;<parent2>,<likelih.parent2>', default="A,0.6;B,0.4", required=True)
+    parser.add_argument('-p','--parentinfo', help='info on parental taxa of hybrids; format: <parent1>:<likelih.parent1>,<parent2>:<likelih.parent2>', default="A,0.6;B,0.4", required=True)
     args = parser.parse_args()
 
-main(args.tree, args.parents)
+main(args.tree, args.parentinfo)
 
 print ""
 print colored("  Done.", 'cyan')
