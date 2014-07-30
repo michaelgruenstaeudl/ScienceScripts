@@ -1,4 +1,4 @@
-		<logTree id="gene_NN.treeFileLog" logEvery="20000" nexusFormat="true" fileName="FILENAME.gene_NN.trees" sortTranslationTable="true">
+		<logTree id="gene_NN.treeFileLog" logEvery="5000" nexusFormat="true" fileName="FILENAME.gene_NN.trees" sortTranslationTable="true">
 			<treeModel idref="gene_NN.treeModel"/>
 			<trait name="rate" tag="gene_NN.rate">
 				<discretizedBranchRates idref="gene_NN.branchRates"/>

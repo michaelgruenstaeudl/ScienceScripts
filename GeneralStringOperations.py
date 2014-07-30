@@ -14,9 +14,13 @@ __status__ = "Working"
 ### CLASSES ###
 ###############
 
-class excisingStrings:
-    '''class for excising strings via keyword delimitation;
-       needs instring <a>, keyword1 <b>, and keyword2 <c> as input'''
+class ExciseString:
+    ''' Excises string via keyword delimitation.
+    Args:
+        instring <a>, keyword1 <b>, keyword2 <c>
+    Returns:
+        outstring
+    '''
        
     def __init__(self,a,b,c):
         self.instring = a           # string
@@ -28,9 +32,13 @@ class excisingStrings:
         pos2 = self.instring.find(self.keyword2,pos1)
         return self.instring[pos1:pos2]
         
-class replacingStrings:
-    '''class for replacing strings via keyword delimitation;
-       needs instring <a>, keyword1 <b>, keyword2 <c>, and replacement <d> as input'''
+class ReplaceString:
+    ''' Replaces string via keyword delimitation.
+    Args:
+        instring <a>, keyword1 <b>, keyword2 <c>
+    Returns:
+        output
+    '''
        
     def __init__(self,a,b,c,d):
         self.instring = a           # string
@@ -60,19 +68,45 @@ class generatingRelativeValues:
         summe = sum(float(x.strip()[3:]) for x in alist)
         return "\n".join(str(x)+(str(float(x.strip()[:3])/summe)[:4]) for x in alist)
 
-class clearSplit:
-    '''class for splitting string without removing delimiter;
-       needs instring <a> and delimiter <b> as input'''
-    def __init__(self,a,b):
+class ClearSplit:
+    ''' Splits string without removing delimiter.
+    Args:
+        instring <a>, delimiter <b>, rightflag <c>
+    Returns:
+        outlist
+    '''
+
+    def __init__(self,a,b,c):
         self.instring = a
         self.delimiter = b
+        self.rightflag = c
         
     def go(self):
-        return [self.delimiter+element for element in self.instring.split(self.delimiter)]
+        splitList = self.instring.split(self.delimiter)
+        if len(splitList) < 2:
+            print "*** Error in "+self.__class__.__name___
+            print "*** Less than two elements after split." 
+        if len(splitList) == 2:
+            if !rightflag:
+                outlist = [splitList[0]+self.delimiter, splitList[1]]
+            if rightflag:            
+                outlist = [splitList[0], self.delimiter+splitList[1]]
+#        else:
+#            outlist = []
+#            for a,b in MakePairwise(splitList):
+#                if !rightflag:
+#                    outlist.append()
 
-class afterFind:
-    '''class for returning index number of end of keyword in instring;
-       needs instring <a> and keyword <b> as input '''
+        return outlist
+
+
+class AfterFind:
+    '''
+    Args:
+        instring <a>, keyword <b>
+    Returns:
+        index number of end of keyword in instring
+    '''
     def __init__(self,a,b):
         self.instring = a
         self.keyword = b
@@ -82,7 +116,7 @@ class afterFind:
         return pos1
 
 
-class remove_extension:
+class RemoveExtension:
     '''class for returning instring without extension (i.e. ".txt" or ".trees";
        needs instring <a> and delimiter <b> as input '''
     def __init__(self,a,b):
@@ -100,7 +134,22 @@ class is_even:
 
     def go(self):
         return self.innumber % 2 == 0
-        
+
+class MakePairwise:
+    ''' Converts a list into pairs of two.
+    Args:
+        inlist <a>
+    Returns:
+        outlist: list of pairs
+    '''
+    def __init__(self,a):
+        self.inlist = a
+
+    def go(self):
+        from itertools import tee, izip
+        a,b = tee(self.inlist)
+        next(b,None)
+        return izip(a,b)        
 
 ###################
 ### DEFINITIONS ###
@@ -109,20 +158,20 @@ class is_even:
 def GenerateRelValues(inlist):
     return generatingRelativeValues(inlist).go()
     
-def afind(a,b):
-    return afterFind(a,b).go()
+def afind(instring,keyword):
+    return AfterFind(instring,keyword).go()
 
-def csplit(a,b):
-    return clearSplit(a,b).go()
+def csplit(instring,delimiter,rightflag=F):
+    return ClearSplit(instring,delimiter,rightflag).go()
 
 def exstr(instring,keyword1,keyword2):
-    return excisingStrings(instring,keyword1,keyword2).go()
+    return ExciseString(instring,keyword1,keyword2).go()
 
 def replstr(instring,keyword1,keyword2,replacement):
-    return replacingStrings(instring,keyword1,keyword2,replacement).go()
+    return ReplaceString(instring,keyword1,keyword2,replacement).go()
 
 def rmext(a):
-    return remove_extension(a,".").go()
+    return RemoveExtension(a,".").go()
 
 def iseven(a):
     return is_even(a).go()

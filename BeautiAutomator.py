@@ -281,7 +281,7 @@ def generateStarBEAST(mydict, mylists, infilename, generations, logEvery, option
 
 def main(mode, pwd, infilename, generations, options):
 
-    logEvery = str(int(generations)/100)                                        # setting up logEvery for *BEAST
+    logEvery = str(int(generations)/2000)                                      # setting up logEvery for *BEAST
 
     infile = open(pwd+infilename).read()
 

@@ -1,7 +1,7 @@
 		</log>
 
 
-		<log id="fileLog" logEvery="20000" fileName="FILENAME.log" overwrite="false">
+		<log id="fileLog" logEvery="5000" fileName="FILENAME.log" overwrite="false">
 			<posterior idref="posterior"/>
 			<prior idref="prior"/>
 			<likelihood idref="likelihood"/>

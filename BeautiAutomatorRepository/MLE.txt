@@ -16,7 +16,7 @@
             </destination>
         </pathLikelihood>
 
-        <log id="MargLikeEst" logEvery="20000" fileName="FILENAME.MargLikeEst.log">
+        <log id="MargLikeEst" logEvery="5000" fileName="FILENAME.MargLikeEst.log">
             <pathLikelihood idref="pathLikelihood"/>
         </log>
 

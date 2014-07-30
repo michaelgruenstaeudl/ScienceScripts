@@ -2,7 +2,7 @@
 		</posterior>
 		<operators idref="operators"/>
 
-		<log id="screenLog" logEvery="20000">
+		<log id="screenLog" logEvery="5000">
 			<column label="Posterior" dp="4" width="12">
 				<posterior idref="posterior"/>
 			</column>
