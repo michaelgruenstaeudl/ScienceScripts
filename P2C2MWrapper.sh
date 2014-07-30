@@ -14,7 +14,7 @@ DESCRIPTION="Shell script that wraps the commands necessary to perform a posteri
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
 VERSION="2014.07.30.1400"
-USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(0/1)>"
+USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
 
 ################################################################################
 
