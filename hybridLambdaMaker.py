@@ -81,34 +81,42 @@ def addHybrDict(intree, hybrDict):
 
 def main(treeName, parentInfo):
     # Reading tree as string
-    treeStr = open(treeName, "r").read()
+    # treeStr = open(treeName, "r").read()
+    treelines = open(treeName, "r").readlines()
+    treeStrs = []
+    for line in treelines:
+        l = line.strip()
+        if len(l) > 0:
+            if l[0] != "#":
+                treeStrs.append(line)
 
-    # Reading tree by DendroPy
-    tree = dendropy.Tree.get_from_string(treeStr,"newick")
-    # DEBUGLINE: print(tree.as_ascii_plot())
-    ## Placeholder to potentially modify tree further
+    for treeStr in treeStrs: 
+        # Reading tree by DendroPy
+        tree = dendropy.Tree.get_from_string(treeStr,"newick")
+        # DEBUGLINE: print(tree.as_ascii_plot())
+        ## Placeholder to potentially modify tree further
 
-    # Left-ladderize tree
-    tree.ladderize(ascending=True)
-    treeStr = tree.as_string('newick')
+        # Left-ladderize tree
+        tree.ladderize(ascending=True)
+        treeStr = tree.as_string('newick')
 
-    # Parsing parentInfo into dictionary
-    aDict = {}
-    for i in parentInfo.split(","):
-        aDict[i.split(":")[0]] = i.split(":")[1]
-    # Hypothetical content of aDict at this point:
-    #    {"B":"0.6", "C":"0.4"}
+        # Parsing parentInfo into dictionary
+        aDict = {}
+        for i in parentInfo.split(","):
+            aDict[i.split(":")[0]] = i.split(":")[1]
+        # Hypothetical content of aDict at this point:
+        #    {"B":"0.6", "C":"0.4"}
 
-    # Adding hybrid information to intree
-    outtree = addHybrDict(treeStr, aDict)
+        # Adding hybrid information to intree
+        outtree = addHybrDict(treeStr, aDict)
 
-    # Adding nodes to tree
-    outtree = addNodeNumbers(outtree)
+        # Adding nodes to tree
+        outtree = addNodeNumbers(outtree)
 
-    # Saving output to file
-    outf = open(GSO.rmext(treeName)+".hybrLmbda.INPUT", "w")
-    outf.write(outtree)
-    outf.close()
+        # Saving output to file
+        outf = open(GSO.rmext(treeName)+".hybrLmbda.INPUT", "a")
+        outf.write(outtree)
+        outf.close()
 
 ###############
 ### EXECUTE ###
