@@ -3,8 +3,8 @@
 __author__ = "Michael Gruenstaeudl, PhD"
 __copyright__ = "Copyright (C) 2014 Michael Gruenstaeudl"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.07.29.1800"
-__status__ = "Pseudocode"
+__version__ = "2014.07.30.1800"
+__status__ = "Testing"
 
 #########################
 ### IMPORT OPERATIONS ###
@@ -74,7 +74,7 @@ def addHybrDict(intree, hybrDict):
 
         # 4. Replace second intree element with hybrid string
         aList[1] = hybStr
-        intree = ''.join(aList)
+        intree = ''.join(aList) # Note: intree line needs to be inside the loop!
 
     return intree 
 
@@ -98,8 +98,7 @@ def main(treeName, parentInfo):
     # Saving output to file
     outf = open(GSO.rmext(treeName)+".hybrLmbda.INPUT", "w")
     outf.write(outtree)
-    outf.close()     
-
+    outf.close()
 
 ###############
 ### EXECUTE ###
