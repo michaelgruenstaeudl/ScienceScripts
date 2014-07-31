@@ -3,7 +3,7 @@
 __author__ = "Michael Gruenstaeudl, PhD"
 __copyright__ = "Copyright (C) 2014 Michael Gruenstaeudl"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.07.30.1800"
+__version__ = "2014.07.31.1400"
 __status__ = "Testing"
 
 #########################
@@ -12,7 +12,7 @@ __status__ = "Testing"
 
 from collections import OrderedDict
 from termcolor import colored
-import argparse, os, sys
+import argparse, dendropy, os, sys
 import GeneralStringOperations as GSO
 
 ###################
@@ -79,8 +79,17 @@ def addHybrDict(intree, hybrDict):
     return intree 
 
 def main(treeName, parentInfo):
-    # Reading plain tree
-    tree = open(treeName, "r").read()
+    # Reading tree as string
+    treeStr = open(treeName, "r").read()
+
+    # Reading tree by DendroPy
+    tree = dendropy.Tree.get_from_string(treeStr,"newick")
+    # DEBUGLINE: print(tree.as_ascii_plot())
+    ## Placeholder to potentially modify tree further
+
+    # Left-ladderize tree
+    tree.ladderize(ascending=True)
+    treeStr = tree.as_string('newick')
 
     # Parsing parentInfo into dictionary
     aDict = {}
@@ -90,7 +99,7 @@ def main(treeName, parentInfo):
     #    {"B":"0.6", "C":"0.4"}
 
     # Adding hybrid information to intree
-    outtree = addHybrDict(tree, aDict)
+    outtree = addHybrDict(treeStr, aDict)
 
     # Adding nodes to tree
     outtree = addNodeNumbers(outtree)
