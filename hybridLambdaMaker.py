@@ -19,6 +19,7 @@ import GeneralStringOperations as GSO
 ### DEFINITIONS ###
 ###################
 
+
 def addNodeNumbers(intree):
     ''' Adding node numbers to tree.
     Args:
