@@ -1,31 +1,35 @@
 #!/usr/bin/env python2
-'''Converting a left-ladderized phylogenetic tree into input for Hybrid-Lambda'''
+'''Converting a phylogenetic tree in Newick format into input for
+Hybrid-Lambda (Zhu et al. 2013, arXiv:1303.0673)'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __copyright__ = "Copyright (C) 2014 Michael Gruenstaeudl"
 __email__ = "gruenstaeudl.1@osu.edu"
 __version__ = "2014.07.31.1400"
 __status__ = "Testing"
 
-#########################
-### IMPORT OPERATIONS ###
-#########################
+#####################
+# IMPORT OPERATIONS #
+#####################
 
 from collections import OrderedDict
 from termcolor import colored
-import argparse, dendropy, os, sys
+import argparse
+import dendropy
 import GeneralStringOperations as GSO
+import os
+import sys
 
-###################
-### DEFINITIONS ###
-###################
+###############
+# DEFINITIONS #
+###############
 
 
-def addNodeNumbers(intree):
+def addNodeNumb(intree):
     ''' Adding node numbers to tree.
     Args:
-        intree: a left-ladderized tree string without node labels.
+        intree:     a left-ladderized tree string without node labels
     Returns:
-        outtree: a left-ladderized tree string with node labels.
+        outtree:    a left-ladderized tree string with node labels
     '''
     outtree = []
     nNodes = intree.count(")")*2
@@ -37,47 +41,53 @@ def addNodeNumbers(intree):
             outtree.append(c)
     return ''.join(outtree)
 
+
 def addHybrDict(intree, hybrDict):
-    ''' Adds hybrid information to tree string in accordance with the 
+    ''' Adds hybrid information to tree string in accordance with the
         requirements of hybrid-Lambda.
     Args:
-        intree: a tree string without hybrid info.
-        hybrDict: a dictionary with hybrid parent info of format {"B":"0.6", "C":"0.4"}
+        intree:     a tree string without hybrid info
+        hybrDict:   a dictionary with hybrid parent info of
+                    format {"B":"0.6", "C":"0.4"}
 
     Returns:
-        outtree: a tree string with hybrid info.
+        outtree:    a tree string with hybrid info
     '''
-    # Looping over the specified parental taxa and incorporating the hybrid 
+    # Looping over the specified parental taxa and incorporating the hybrid
     # info for each taxon in list
-    for key,val in hybrDict.iteritems():
+    for key, val in hybrDict.iteritems():
 
         # 1. Replace parent's brlen with adjusted brlen
         if not intree.find(key):
-            print colored("  Error: Specified hybrid parent not found in input tree.", 'red')
+            print colored("Error: Specified hybrid parent not present in \
+                           input tree.", 'red')
             break
         else:
-            # Parse out the branch length immediately following the key, 
+            # Parse out the branch length immediately following the key,
             # save as "brlen"; then replace said branch length with
             # half of value
             try:
-                brlen = float(GSO.exstr(intree,key+":",")"))
-                intree = GSO.replstr(intree,key+":",")",str(brlen*0.5))
+                brlen = float(GSO.exstr(intree, key+":", ")"))
+                intree = GSO.replstr(intree, key+":", ")", str(brlen*0.5))
             except ValueError:
-                brlen = float(GSO.exstr(intree,key+":",","))
-                intree = GSO.replstr(intree,key+":",",",str(brlen*0.5))
+                brlen = float(GSO.exstr(intree, key+":", ","))
+                intree = GSO.replstr(intree, key+":", ",", str(brlen*0.5))
 
         # 2. Split intree into three sections by keywords
-        split1 = GSO.csplit(intree,key,rightflag=True)
-        aList = [split1[0]] + GSO.csplit(split1[1],key+":"+str(brlen*0.5),rightflag=False)
+        split1 = GSO.csplit(intree, key, rightflag=True)
+        aList = [split1[0]] + GSO.csplit(split1[1], key+":"+str(brlen*0.5),
+                                         rightflag=False)
 
         # 3. Compile hybrid info in a string
         hybStr = "(h#"+val+":"+str(brlen*0.5)+","+aList[1]+"):"+str(brlen*0.5)
 
         # 4. Replace second intree element with hybrid string
         aList[1] = hybStr
-        intree = ''.join(aList) # Note: intree line needs to be inside the loop!
+        # Note: intree in TFL needs to be inside the loop!
+        intree = ''.join(aList)
 
-    return intree 
+    return intree
+
 
 def main(treeName, parentInfo):
     # Reading tree as string
@@ -90,11 +100,11 @@ def main(treeName, parentInfo):
             if l[0] != "#":
                 treeStrs.append(line)
 
-    for treeStr in treeStrs: 
+    for treeStr in treeStrs:
         # Reading tree by DendroPy
-        tree = dendropy.Tree.get_from_string(treeStr,"newick")
+        tree = dendropy.Tree.get_from_string(treeStr, "newick")
         # DEBUGLINE: print(tree.as_ascii_plot())
-        ## Placeholder to potentially modify tree further
+        # Placeholder to potentially modify tree further
 
         # Left-ladderize tree
         tree.ladderize(ascending=True)
@@ -111,16 +121,16 @@ def main(treeName, parentInfo):
         outtree = addHybrDict(treeStr, aDict)
 
         # Adding nodes to tree
-        outtree = addNodeNumbers(outtree)
+        outtree = addNodeNumb(outtree)
 
         # Saving output to file
         outf = open(GSO.rmext(treeName)+".hybrLmbda.INPUT", "a")
         outf.write(outtree)
         outf.close()
 
-###############
-### EXECUTE ###
-###############
+###########
+# EXECUTE #
+###########
 
 print ""
 print colored("  Script name: "+sys.argv[0], 'cyan')
@@ -129,13 +139,17 @@ print colored("  Version: "+__version__, 'cyan')
 print ""
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Converting a left-ladderized phylogenetic tree into input for Hybrid-Lambda; '+__copyright__)
-    parser.add_argument('-t','--tree', help='name of input tree (left-ladderized!)', default="infile.tre", required=True)
-    parser.add_argument('-p','--parentinfo', help='info on parental taxa of hybrids; format: <parent1>:<likelih.parent1>,<parent2>:<likelih.parent2>', default="A:0.6,B:0.4", required=True)
+    parser = argparse.ArgumentParser(description='Converting a phylogenetic \
+    tree in Newick format into input for Hybrid-Lambda (Zhu et al. 2013, \
+    arXiv:1303.0673); '+__copyright__)
+    parser.add_argument('-t', '--tree', help='name of input tree',
+                        default="infile.tre", required=True)
+    parser.add_argument('-p', '--parentinfo', help='info on parental taxa of \
+    hybrids; format: <parent1>:<likelih.parent1>,<parent2>:<likelih.parent2>',
+                        default="A:0.6,B:0.4", required=True)
     args = parser.parse_args()
 
 main(args.tree, args.parentinfo)
 
 print colored("  Done.", 'cyan')
 print ""
-
