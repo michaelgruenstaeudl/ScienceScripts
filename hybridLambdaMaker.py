@@ -92,6 +92,17 @@ def addHybrDict(intree, hybrDict):
 def main(treeName, parentInfo):
     # Reading tree as string
     # treeStr = open(treeName, "r").read()
+    import re
+    search = re.search('\w+:(\d*\.\d+),\w+:(\d*\.\d+)', parentInfo, \
+            re.IGNORECASE)
+    if search:
+            alik = search.group(1)
+            blik = search.group(2)
+    
+    if alik == blik:
+        print colored("Parent likelihoods must not be the same", "red")
+        sys.exit()
+
     treelines = open(treeName, "r").readlines()
     treeStrs = []
     for line in treelines:
