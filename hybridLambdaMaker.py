@@ -58,10 +58,11 @@ def addHybrDict(intree, hybrDict):
     for key, val in hybrDict.iteritems():
 
         # 1. Replace parent's brlen with adjusted brlen
-        if not intree.find(key):
-            print colored("Error: Specified hybrid parent not present in \
-                           input tree.", 'red')
-            break
+        # print key, val
+        # print intree
+        if not key in intree:
+            print colored("Error: Specified hybrid parent not present in input tree.\n", 'red')
+            sys.exit()
         else:
             # Parse out the branch length immediately following the key,
             # save as "brlen"; then replace said branch length with
@@ -118,9 +119,11 @@ def main(treeName, parentInfo):
         # Placeholder to potentially modify tree further
 
         # Left-ladderize tree
-        tree.ladderize(ascending=True)
+        tree.ladderize(ascending=False)
         treeStr = tree.as_string('newick')
-
+   
+        # remove [&U]
+        treeStr = treeStr[4:]
         # Parsing parentInfo into dictionary
         aDict = {}
         for i in parentInfo.split(","):
