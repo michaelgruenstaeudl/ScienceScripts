@@ -1,0 +1,5 @@
+# Unimodal skewed distribution
+sigma = 0.6
+mu = 3
+delta = 5
+unimodal_skewed_distr = rnorm(10000, rlnorm(10000, mu, sigma), delta)

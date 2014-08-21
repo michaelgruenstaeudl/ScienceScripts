@@ -2,7 +2,7 @@
 """Beauti-Automator: Batch Generation of XML Input Files for BEAST and *BEAST."""
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.07.18.1700"
+__version__ = "2014.08.14.2000"
 __status__ = "Working"
 
 #########################
@@ -20,8 +20,9 @@ from termcolor import colored
 ### GLOBAL VARIABLES ###
 ########################
 
-glob_dict = {   "a": "pop1", "b": "pop2", "c": "pop3", "d": "pop4", "e": "pop5", "f": "pop6", 
-                "g": "pop7", "h": "pop7", "i": "pop8", "o": "out4"  }
+# LEGACYCODE:
+#glob_dict = {   "a": "pop1", "b": "pop2", "c": "pop3", "d": "pop4", "e": "pop5", "f": "pop6", 
+#                "g": "pop7", "h": "pop8", "i": "pop9", "o": "out4"  }
 
 # Path to script directory
 psd = "/home/michael/git/ScienceScripts/"
@@ -66,7 +67,7 @@ class OT1aGenerator(XMLtaglist):
         el = ET.Element("taxon")                # Generates: <taxon >
         subel = ET.SubElement(el, "attr")       # Generates: <attr >
         subel.set("name", "species")            # Generates: name="species"
-        subel.text = glob_dict[key[0]]          # Generates: pop2
+        subel.text = key[0].upper()             # Generates: B
         el.set("id", key)                       # Generates: id="b26"
         return el
 
@@ -74,7 +75,8 @@ class OT1aGenerator(XMLtaglist):
 ### DEFINITIONS ###
 ###################
 
-def generate_AR1(mode,counter,mydict):
+
+def generate_AR1(mode, counter, mydict):
     outlist = ['\t\t<sequence><taxon idref="'+key+'"/>'+str(mydict[key].seq)+'</sequence>' for key in mydict]
     if mode == "1":
         return '\t<alignment id="alignment" dataType="nucleotide">\n'+'\n'.join(outlist)+'\n\t</alignment>\n'
@@ -86,23 +88,27 @@ def generate_AR1(mode,counter,mydict):
 #    outlist = ['\t\t<taxon id="'+key+'"><attr name="species">'+glob_dict[key[0]]+'</attr></taxon>' for key in mydict]
 #    return '\n'.join(outlist)
 
+
 def generate_OT1b(mydict):
     outlist = ['\t\t<taxon id="'+key+'"/>' for key in mydict]
     return '\n'.join(outlist)
+
 
 def generate_OT2(mydict):
     unique_keystarts = set([key[0] for key in mydict])                          # set() gives unique values from list
     outstring = ""
     for letter in unique_keystarts:
         tmplist = ['\t\t\t<taxon idref="'+key+'"/>\n' for key in mydict if key[0]==letter]
-        tmpstring = '\t\t<sp id="'+glob_dict[letter]+'">\n'+''.join(tmplist)+'\t\t</sp>\n'
+        tmpstring = '\t\t<sp id="'+letter.upper()+'">\n'+''.join(tmplist)+'\t\t</sp>\n'
         outstring += tmpstring
     return outstring
 
+
 def generate_OT3(mydict):
     unique_keystarts = set([key[0] for key in mydict])
-    outlist = ['\t\t<sp idref="'+glob_dict[letter]+'"/>' for letter in unique_keystarts]  # list comprehension
+    outlist = ['\t\t<sp idref="'+letter.upper()+'"/>' for letter in unique_keystarts]  # list comprehension
     return '\n'.join(outlist)
+
 
 def generate_RE(mode, counter, pwd, fileprefix):
     handle = open(pwd+fileprefix+".txt").read()
@@ -111,8 +117,10 @@ def generate_RE(mode, counter, pwd, fileprefix):
     if mode == "2":
         return handle.replace("gene_NN", "gene"+str(counter)).replace("alignmentNN", "alignment"+str(counter))
 
+
 def splitkeepsep(astring, sep):                                                 # splits a string by separator, but keeps separator; inspired by http://programmaticallyspeaking.com/
     return reduce(lambda acc, elem: acc + [elem] if elem == sep else acc[:-1] + [acc[-1] + elem], re.split("(%s)" % re.escape(sep), astring)[1:], [])
+
 
 def generateBEAST(mydict, mylists, infilename, generations, logEvery, options):
 
@@ -120,35 +128,35 @@ def generateBEAST(mydict, mylists, infilename, generations, logEvery, options):
     mylists["OT1b"] = generate_OT1b(mydict)
 
     # Replacements via RegEx
-    mylists["SE3"] = re.sub(r'value="[^"]*"','value="0.0088"',mylists["SE3"])   # difference between BEAST and starBEAST
+    mylists["SE3"] = re.sub(r'value="[^"]*"', 'value="0.0088"', mylists["SE3"])   # difference between BEAST and starBEAST
 
     start = mylists["SE10"].find('\t</operators>')
     end = mylists["SE10"].find('<prior id="prior">', start)+18
     mylists["SE10"] = mylists["SE10"][start:end]
-    mylists["SE10"] = re.sub(r'chainLength="[^"]*"','chainLength="'+str(generations)+'"',mylists["SE10"])
-    mylists["SE10"] = re.sub(r'operatorAnalysis="[^"]*.ops"','',mylists["SE10"])  
+    mylists["SE10"] = re.sub(r'chainLength="[^"]*"', 'chainLength="'+str(generations)+'"', mylists["SE10"])
+    mylists["SE10"] = re.sub(r'operatorAnalysis="[^"]*.ops"', '', mylists["SE10"])  
 
     start = mylists["SE11"].find('\t\t\t\t<oneOnXPrior>')
     end = mylists["SE11"].find('</oneOnXPrior>', start)+14
     mylists["SE11"] = mylists["SE11"][start:end]
-    mylists["SE11"] = re.sub(r'idref="[^"]*"','idref="constant.popSize"',mylists["SE11"])
+    mylists["SE11"] = re.sub(r'idref="[^"]*"', 'idref="constant.popSize"', mylists["SE11"])
 
     end = mylists["SE12"].find('<column label="PopMean"')
     mylists["SE12"] = mylists["SE12"][:end]
-    mylists["SE12"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["SE12"])
-    mylists["SE12"] = re.sub(r'<speciesCoalescent*','',mylists["SE12"])
+    mylists["SE12"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["SE12"])
+    mylists["SE12"] = re.sub(r'<speciesCoalescent*', '', mylists["SE12"])
 
     end = mylists["SE13"].find("<speciesCoalescent")
     mylists["SE13"] = mylists["SE13"][:end]
-    mylists["SE13"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["SE13"])
-    mylists["SE13"] = re.sub(r'fileName="[^"]*.log"','fileName="'+infilename+'.log"',mylists["SE13"])
+    mylists["SE13"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["SE13"])
+    mylists["SE13"] = re.sub(r'fileName="[^"]*.log"', 'fileName="'+infilename+'.log"', mylists["SE13"])
 
-    mylists["RE23"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["RE23"])
-    mylists["RE23"] = re.sub(r'fileName="[^"]*.trees"','fileName="'+infilename+'.trees"',mylists["RE23"])
+    mylists["RE23"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["RE23"])
+    mylists["RE23"] = re.sub(r'fileName="[^"]*.trees"', 'fileName="'+infilename+'.trees"', mylists["RE23"])
 
-    mylists["MLE"] = re.sub(r'chainLength="[^"]*"','chainLength="'+str(generations)+'"',mylists["MLE"])
-    mylists["MLE"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["MLE"])
-    mylists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"','fileName="'+infilename+'.MargLikeEst.log"',mylists["MLE"])
+    mylists["MLE"] = re.sub(r'chainLength="[^"]*"', 'chainLength="'+str(generations)+'"', mylists["MLE"])
+    mylists["MLE"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["MLE"])
+    mylists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"', 'fileName="'+infilename+'.MargLikeEst.log"', mylists["MLE"])
 
     results =   mylists["SE1"] +\
                 mylists["OT1b"] +\
@@ -206,23 +214,23 @@ def generateStarBEAST(mydict, mylists, infilename, generations, logEvery, option
     mylists["OT3"] = generate_OT3(mydict)
 
     # Replacements via RegEx
-    mylists["SE10"] = re.sub(r'chainLength="[^"]*"','chainLength="'+str(generations)+'"',mylists["SE10"])
-    mylists["SE10"] = re.sub(r'operatorAnalysis="[^"]*.ops"','operatorAnalysis="'+infilename+'.ops"',mylists["SE10"])
+    mylists["SE10"] = re.sub(r'chainLength="[^"]*"', 'chainLength="'+str(generations)+'"', mylists["SE10"])
+    mylists["SE10"] = re.sub(r'operatorAnalysis="[^"]*.ops"', 'operatorAnalysis="'+infilename+'.ops"', mylists["SE10"])
 
-    mylists["SE12"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["SE12"])
+    mylists["SE12"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["SE12"])
 
-    mylists["SE13"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["SE13"])
-    mylists["SE13"] = re.sub(r'fileName="[^"]*.log"','fileName="'+infilename+'.log"',mylists["SE13"])
+    mylists["SE13"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["SE13"])
+    mylists["SE13"] = re.sub(r'fileName="[^"]*.log"', 'fileName="'+infilename+'.log"', mylists["SE13"])
 
-    mylists["SE14"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["SE14"])
-    mylists["SE14"] = re.sub(r'fileName="[^"]*.species.trees"','fileName="'+infilename+'.species.trees"',mylists["SE14"])
+    mylists["SE14"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["SE14"])
+    mylists["SE14"] = re.sub(r'fileName="[^"]*.species.trees"', 'fileName="'+infilename+'.species.trees"', mylists["SE14"])
 
-    mylists["RE23"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"','\n'.join(mylists["RE23"]))
-    mylists["RE23"] = re.sub(r'fileName="[^"]*.gene','fileName="'+infilename+'.gene',mylists["RE23"])
+    mylists["RE23"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', '\n'.join(mylists["RE23"]))
+    mylists["RE23"] = re.sub(r'fileName="[^"]*.gene', 'fileName="'+infilename+'.gene', mylists["RE23"])
 
-    mylists["MLE"] = re.sub(r'chainLength="[^"]*"','chainLength="'+str(generations)+'"',mylists["MLE"])
-    mylists["MLE"] = re.sub(r'logEvery="[^"]*"','logEvery="'+str(logEvery)+'"',mylists["MLE"])
-    mylists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"','fileName="'+infilename+'.MargLikeEst.log"',mylists["MLE"])
+    mylists["MLE"] = re.sub(r'chainLength="[^"]*"', 'chainLength="'+str(generations)+'"', mylists["MLE"])
+    mylists["MLE"] = re.sub(r'logEvery="[^"]*"', 'logEvery="'+str(logEvery)+'"', mylists["MLE"])
+    mylists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"', 'fileName="'+infilename+'.MargLikeEst.log"', mylists["MLE"])
 
 
     results =   mylists["SE1"] +\
@@ -279,6 +287,7 @@ def generateStarBEAST(mydict, mylists, infilename, generations, logEvery, option
 ### MAIN ###
 ############
 
+
 def main(mode, pwd, infilename, generations, options):
 
     logEvery = str(int(generations)/2000)                                      # setting up logEvery for *BEAST
@@ -287,34 +296,34 @@ def main(mode, pwd, infilename, generations, options):
 
     if infile.count("#NEXUS") > 1:                                              # if infile contains multiple instances of "#NEXUS"
         alist = splitkeepsep(infile, "#NEXUS")                                  # split these instances, but keep the seperator (i.e. "#NEXUS")
-        alist = filter(None,alist)                                              # remove all empty list elements
+        alist = filter(None, alist)                                              # remove all empty list elements
     else:
         alist = [infile]                                                        # else, create a list with just one element
 
     mylists = collections.defaultdict(list)                                     # initialization with a default dictionary
 
     if mode == "1":
-        print "  Selected mode:",colored("BEAST","magenta")
+        print "  Selected mode:", colored("BEAST", "magenta")
         if options == "1":
-            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
+            print "  Adding code for:", colored("Marginal Likelihoods", "magenta")
         bar = Bar('  Generating XML files', max=len(alist))
-        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
+        for nexuscounter, element in enumerate(alist, start=1):                   # loop through alist, also keep a counter
             handle = StringIO(element)                                          # convert string to file object
             mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
             filename = infilename[:-4]+".GeneTree.gene"+str(nexuscounter)
 
         # Loading Alignment Repeating (AR) elements; inside the loop
-            mylists["AR1"] = generate_AR1(mode,nexuscounter, mydict)
+            mylists["AR1"] = generate_AR1(mode, nexuscounter, mydict)
 
         # Loading Repeating elements (RE); inside the loop
-            for REnumber in range(1,24):
+            for REnumber in range(1, 24):
                 mylists["RE"+str(REnumber)] = generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber))
 
         # Loading Stationary elements (SE)
-            for SEnumber in range(1,16):
+            for SEnumber in range(1, 16):
                 mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
 
-            for SPnumber in range(1,4):
+            for SPnumber in range(1, 4):
                 mylists["SP"+str(SPnumber)] = open(psd+"BeautiAutomatorRepository/"+"SP"+str(SPnumber)+".txt").read()
 
         # Loading Marginal likelihood elements (MLE)
@@ -322,7 +331,7 @@ def main(mode, pwd, infilename, generations, options):
 
             results = generateBEAST(mydict, mylists, filename, generations, logEvery, options)
 
-            outfile = open(pwd+filename+".xml","w")
+            outfile = open(pwd+filename+".xml", "w")
             outfile.write(results)                                              # outfile INSIDE the nexuscounter-loop
             outfile.close()
             bar.next()
@@ -330,25 +339,25 @@ def main(mode, pwd, infilename, generations, options):
 
 
     if mode == "2":
-        print "  Selected mode:",colored("starBEAST","magenta")
+        print "  Selected mode:", colored("starBEAST", "magenta")
         if options == "1":
-            print "  Adding code for:",colored("Marginal Likelihoods","magenta")
+            print "  Adding code for:", colored("Marginal Likelihoods", "magenta")
         bar = Bar("  Generating XML files", max=len(alist))
-        for nexuscounter,element in enumerate(alist,start=1):                   # loop through alist, also keep a counter
+        for nexuscounter, element in enumerate(alist, start=1):                   # loop through alist, also keep a counter
             handle = StringIO(element)                                          # convert string to file object
             mydict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))                # read file object and parse into dictionary
             
         # Loading Alignment Repeating (AR) elements; inside the loop
-            mylists["AR1"].append(generate_AR1(mode,nexuscounter, mydict))
+            mylists["AR1"].append(generate_AR1(mode, nexuscounter, mydict))
 
         # Loading Repeating elements (RE); inside the loop
-            for REnumber in range(1,24):
+            for REnumber in range(1, 24):
                 mylists["RE"+str(REnumber)].append(generate_RE(mode, nexuscounter, psd+"BeautiAutomatorRepository/", "RE"+str(REnumber)))
 
             bar.next()
 
         # Loading Stationary elements (SE); outside the loop
-        for SEnumber in range(1,16):                                            # must not be in for-loop from above
+        for SEnumber in range(1, 16):                                            # must not be in for-loop from above
             mylists["SE"+str(SEnumber)] = open(psd+"BeautiAutomatorRepository/"+"SE"+str(SEnumber)+".txt").read()
 
         # Loading Marginal likelihood elements (MLE); outside the loop
@@ -357,7 +366,7 @@ def main(mode, pwd, infilename, generations, options):
         filename = infilename[:-4]+".SpeciesTree"                               # for starBeast, gene number is not part of the
         results = generateStarBEAST(mydict, mylists, filename, generations, logEvery, options)
 
-        outfile = open(pwd+filename+".xml","w")                                 # outfile OUTSIDE the nexuscounter-loop
+        outfile = open(pwd+filename+".xml", "w")                                 # outfile OUTSIDE the nexuscounter-loop
         outfile.write(results)
         outfile.close()
         bar.finish()
@@ -374,11 +383,11 @@ print ""
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Batch Generation of XML Input Files for BEAST and *BEAST; 2014 Michael Gruenstaeudl')
-    parser.add_argument('-m','--mode', help='1 = BEAST, 2 = starBEAST', default="1", required=True)
-    parser.add_argument('-p','--pwd', help='/path/to/working/dir', default="~/Desktop/", required=True)
-    parser.add_argument('-i','--infilename', help='name of input NEXUS file', default="test.nex", required=True)
-    parser.add_argument('-g','--generations', help='number of MCMC generations', default="2000000", required=True)
-    parser.add_argument('-o','--options', help='0 = none, 1 = Marginal Likelihood Estimation', default="0", required=False)
+    parser.add_argument('-m', '--mode', help='1 = BEAST, 2 = starBEAST', default="1", required=True)
+    parser.add_argument('-p', '--pwd', help='/path/to/working/dir', default="~/Desktop/", required=True)
+    parser.add_argument('-i', '--infilename', help='name of input NEXUS file', default="test.nex", required=True)
+    parser.add_argument('-g', '--generations', help='number of MCMC generations', default="2000000", required=True)
+    parser.add_argument('-o', '--options', help='0 = none, 1 = Marginal Likelihood Estimation', default="0", required=False)
     args = parser.parse_args()
 
 main(args.mode, args.pwd, args.infilename, args.generations, args.options)

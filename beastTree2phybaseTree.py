@@ -58,19 +58,22 @@ def converting_dmv_to_theta(inList):
     # Calculating artithmetic mean
     tmpValue = numpy.mean(tmpList)
     # Multiplying by two
-    outValue = str(float(tmpValue)*2)
+    tmpValue = float(tmpValue)*2
+    # Restrict number of significands to 4 and then convert to string
+    outValue = str(round(tmpValue, 4))
     return outValue
 
 def formatting_tree_string(inString):
     ''' Formatting a tree string '''
-    # Convert entire string into lower case
-    handle = inString.lower()
+    # Convert entire string into upper case
+    # My Rule: "species tree stuff is alays in upper case"
+    handle = inString.upper()
     # Remove "taxa" section of nexus file
-    handle = handle.replace(handle[handle.find("begin taxa;"):handle.find("end;", \
-    handle.find("begin taxa;"))+4],"")
-    handle = handle.replace("[&theta=","#")
-    handle = handle.replace("[&r]","")
-    # Note: Remove "[&r]" prior to "]"; otherwise "[&r]" is no longer found.
+    handle = handle.replace(handle[handle.find("BEGIN TAXA;"):handle.find("END;", \
+    handle.find("BEGIN TAXA;"))+4],"")
+    handle = handle.replace("[&THETA=","#")
+    handle = handle.replace("[&R]","")
+    # Note: Remove "[&R]" prior to "]"; otherwise "[&R]" is no longer found.
     handle = handle.replace("]","")
     return handle
 

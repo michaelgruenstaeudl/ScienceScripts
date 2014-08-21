@@ -13,7 +13,7 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script that wraps the commands necessary to perform a posterior predictive checking of the coalescent model"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.07.30.1400"
+VERSION="2014.08.21.1800"
 USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
 
 ################################################################################
@@ -78,7 +78,7 @@ cd $ABS_PATH_TO_INDIR
 # Generating R commands
 echo "source('/home/michael/git/osu_eeob_gruenstaeudl/P2C2M/wrapper.R')" > Rcmds.$INFILE.R
 echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME','$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
-#echo "warnings()" >> Rcmds.$INFILE.R
+echo "warnings()" >> Rcmds.$INFILE.R
 echo "q()" >> Rcmds.$INFILE.R
 
 # Executing commands in R with command args
@@ -87,10 +87,13 @@ Rscript Rcmds.$INFILE.R
 ################################################################################
 
 # STEP 3: File hygiene
+
+echo " Conducting file hygiene ..."
+
 mv $INFILE.PRMT $INFILE.RSLT $ABS_PATH_TO_OUTDIR/
+tar czf $INFILE.PRMT.tar.gz $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
 rm Rcmds.$INFILE.R
 cd ~
-#tar czf ${ABS_PATH_TO_INDIR:0:-1}.tar.gz $ABS_PATH_TO_INDIR
 
 ################################################################################
 
