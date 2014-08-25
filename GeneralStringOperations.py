@@ -2,7 +2,7 @@
 '''General String Operations'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.08.25.1200"
+__version__ = "2014.08.25.1300"
 __status__ = "Working"
 
 #####################
@@ -10,6 +10,7 @@ __status__ = "Working"
 #####################
 
 import re
+
 
 ###########
 # CLASSES #
@@ -196,9 +197,11 @@ def rmext(a):
 def iseven(a):
     return is_even(a).go()
 
-# splits a string by separator, but keeps separator
-# inspired by http://programmaticallyspeaking.com/
+
 def splitkeepsep(aString, sep):
-    return reduce(lambda acc, elem: acc + \
-        [elem] if elem == sep else acc[:-1] + \
-        [acc[-1] + elem], re.split("(%s)" % re.escape(sep), aString)[1:], [])
+    ''' splits a string by separator, but keeps separator
+    inspired by http://programmaticallyspeaking.com '''
+    return reduce(lambda acc, elem: acc +
+                  [elem] if elem == sep else acc[:-1] +
+                  [acc[-1] + elem],
+                  re.split("(%s)" % re.escape(sep), aString)[1:], [])
