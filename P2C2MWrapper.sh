@@ -70,7 +70,9 @@ fi
 
 # STEP 2: Generating R commands for starBeastPPS analysis
 
-echo " Analyzing $INFILE ..."
+echo ""
+echo -e " ${blue}Analyzing $INFILE ...${nocolor}"
+echo ""
 
 # Changing input directory
 cd $ABS_PATH_TO_INDIR
@@ -88,7 +90,9 @@ Rscript Rcmds.$INFILE.R
 
 # STEP 3: File hygiene
 
-echo " Conducting file hygiene ..."
+echo ""
+echo -e " ${blue}Conducting file hygiene ...${nocolor}"
+echo ""
 
 mv $INFILE.PRMT $INFILE.RSLT $ABS_PATH_TO_OUTDIR/
 tar czf $INFILE.PRMT.tar.gz $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
