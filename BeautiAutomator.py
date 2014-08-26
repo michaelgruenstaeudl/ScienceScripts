@@ -70,7 +70,7 @@ class makeOT1a(XMLtaglist):
         subel = ET.SubElement(el, "attr")      # Generates: <attr >
         subel.set("name", "species")           # Generates: name="species"
         subel.text = key[0].upper()            # Generates: B
-        el.set("id", key)                      # Generates: id="b26"
+        el.set("id", key)                      # Generates: id="b0026"
         return el
 
 ###############
@@ -85,7 +85,7 @@ def makeAR1(mode, cntr, inDict):
         return '\t<alignment id="alignment" dataType="nucleotide">\n' +\
                '\n'.join(outLst)+'\n\t</alignment>\n'
     if mode == "2":
-        return '\t<alignment id="alignment' + str(cntr) +\
+        return '\t<alignment id="alignment' + cntr +\
                '" dataType="nucleotide">\n' + '\n'.join(outLst) +\
                '\n\t</alignment>\n'
 
@@ -123,8 +123,8 @@ def makeRE(mode, cntr, pwd, filePrefix):
         return (handle.replace("gene_NN.", "")
                 .replace("alignmentNN", "alignment"))
     if mode == "2":
-        return (handle.replace("gene_NN", "gene"+str(cntr))
-                .replace("alignmentNN", "alignment"+str(cntr)))
+        return (handle.replace("gene_NN", "gene" + cntr)
+                .replace("alignmentNN", "alignment" + cntr))
 
 
 def generateBEAST(inDict, myLists, inFn, nGens, logEvery):
@@ -406,14 +406,13 @@ def main(mode, pwd, inFn, nGens):
             # Convert keys in inDict to appropriate numbering
             seqDict = addLeadZeros(inDict)
 
-            print seqDict
-
             # Loading Alignment Repeating (AR) elements; inside the loop
-            myLists["AR1"] = makeAR1(mode, nxsCntr, seqDict)
+            myLists["AR1"] = makeAR1(mode, str(nxsCntr).zfill(3), seqDict)
 
             # Loading Repeating elements (RE); inside the loop
             for REnmbr in range(1, 24):
-                myLists["RE" + str(REnmbr)] = makeRE(mode, nxsCntr,
+                myLists["RE" + str(REnmbr)] = makeRE(mode, 
+                                                     str(nxsCntr).zfill(3),
                                                      psd + "BARepo/",
                                                      "RE" + str(REnmbr))
 
@@ -431,7 +430,7 @@ def main(mode, pwd, inFn, nGens):
 #            # Loading Marginal likelihood elements (MLE)
 #            myLists["MLE"] = open(psd+"BARepo/"+"MLE.txt").read()
 
-            fName = inFnStem + ".GeneTree.gene" + str(nxsCntr)
+            fName = inFnStem + ".GeneTree.gene" + str(nxsCntr).zfill(3)
             results = generateBEAST(seqDict, myLists,
                                     fName, nGens, logEvery)
 
@@ -460,12 +459,15 @@ def main(mode, pwd, inFn, nGens):
             seqDict = addLeadZeros(inDict)
 
             # Loading Alignment Repeating (AR) elements; inside the loop
-            myLists["AR1"].append(makeAR1(mode, nxsCntr, seqDict))
+            myLists["AR1"].append(makeAR1(mode,
+                                          str(nxsCntr).zfill(3),
+                                          seqDict))
 
             # Loading Repeating elements (RE); inside the loop
             for REnmbr in range(1, 24):
                 myLists["RE"+str(REnmbr)].append(
-                    makeRE(mode, nxsCntr, psd + "BARepo/", "RE" + str(REnmbr)))
+                    makeRE(mode, str(nxsCntr).zfill(3),
+                           psd + "BARepo/", "RE" + str(REnmbr)))
 
             bar.next()
 
