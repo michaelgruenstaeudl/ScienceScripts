@@ -3,7 +3,7 @@
 and *BEAST.'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.08.25.1200"
+__version__ = "2014.08.25.2000"
 __status__ = "Working"
 
 #####################
@@ -58,10 +58,10 @@ class XMLtaglist(object):
         return self.tags
 
 
-class OT1aGenerator(XMLtaglist):
-    def __init__(self, myDict):
-        super(OT1aGenerator, self).__init__()
-        self.fromdict(myDict)
+class makeOT1a(XMLtaglist):
+    def __init__(self, inDict):
+        super(makeOT1a, self).__init__()
+        self.fromdict(inDict)
 
 # Example output of TFL:
 # <taxon id="b26"><attr name="species">pop2</attr></taxon>
@@ -78,9 +78,9 @@ class OT1aGenerator(XMLtaglist):
 ###############
 
 
-def mke_AR1(mode, cntr, myDict):
-    outLst = ['\t\t<sequence><taxon idref="'+key+'"/>' +
-              str(myDict[key].seq) + '</sequence>' for key in myDict]
+def makeAR1(mode, cntr, inDict):
+    outLst = ['\t\t<sequence><taxon idref="' + key + '"/>' +
+              str(inDict[key]) + '</sequence>' for key in inDict]
     if mode == "1":
         return '\t<alignment id="alignment" dataType="nucleotide">\n' +\
                '\n'.join(outLst)+'\n\t</alignment>\n'
@@ -89,40 +89,35 @@ def mke_AR1(mode, cntr, myDict):
                '" dataType="nucleotide">\n' + '\n'.join(outLst) +\
                '\n\t</alignment>\n'
 
-# LEGACYCODE:
-#def mke_OT1a(myDict):
-#    outLst = ['\t\t<taxon id="'+key+'"><attr name="species">'+glob_dict[key[0]]+'</attr></taxon>' for key in myDict]
-#    return '\n'.join(outLst)
 
-
-def mke_OT1b(myDict):
-    outLst = ['\t\t<taxon id="'+key+'"/>' for key in myDict]
+def makeOT1b(inDict):
+    outLst = ['\t\t<taxon id="' + key + '"/>' for key in inDict]
     return '\n'.join(outLst)
 
 
-def mke_OT2(myDict):
+def makeOT2(inDict):
     # set() returns unique values from list
-    unique_keystarts = set([key[0] for key in myDict])
+    uniqKeyStrt = set([key[0] for key in inDict])
     outStr = ""
-    for ltr in unique_keystarts:
+    for ltr in uniqKeyStrt:
         # Using list comprehension in TFL
         tmpList = ['\t\t\t<taxon idref="' + key + '"/>\n'
-                   for key in myDict if key[0] == ltr]
+                   for key in inDict if key[0] == ltr]
         tmpStr = '\t\t<sp id="' + ltr.upper() + '">\n' +\
                  ''.join(tmpList) + '\t\t</sp>\n'
         outStr += tmpStr
     return outStr
 
 
-def mke_OT3(myDict):
-    unique_keystarts = set([key[0] for key in myDict])
+def makeOT3(inDict):
+    uniqKeyStrt = set([key[0] for key in inDict])
     # Using list comprehension in TFL
     outLst = ['\t\t<sp idref="' + ltr.upper() + '"/>'
-              for ltr in unique_keystarts]
+              for ltr in uniqKeyStrt]
     return '\n'.join(outLst)
 
 
-def mke_RE(mode, cntr, pwd, filePrefix):
+def makeRE(mode, cntr, pwd, filePrefix):
     handle = open(pwd+filePrefix+".txt").read()
     if mode == "1":
         return (handle.replace("gene_NN.", "")
@@ -132,10 +127,10 @@ def mke_RE(mode, cntr, pwd, filePrefix):
                 .replace("alignmentNN", "alignment"+str(cntr)))
 
 
-def generateBEAST(myDict, myLists, inFname, nGens, logEvery, options):
+def generateBEAST(inDict, myLists, inFn, nGens, logEvery):
 
     # Loading One-Time (OT) elements; outside the loop
-    myLists["OT1b"] = mke_OT1b(myDict)
+    myLists["OT1b"] = makeOT1b(inDict)
 
     # Replacements via RegEx
     # difference between BEAST and starBEAST
@@ -143,7 +138,7 @@ def generateBEAST(myDict, myLists, inFname, nGens, logEvery, options):
 
     # SE10
     start = myLists["SE10"].find('\t</operators>')
-    end = myLists["SE10"].find('<prior id="prior">', start)+18
+    end = myLists["SE10"].find('<prior id="prior">', start) + 18
     myLists["SE10"] = myLists["SE10"][start:end]
     myLists["SE10"] = re.sub(r'chainLength="[^"]*"',
                              'chainLength="' + str(nGens) + '"',
@@ -177,7 +172,7 @@ def generateBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'logEvery="' + str(logEvery) + '"',
                              myLists["SE13"])
     myLists["SE13"] = re.sub(r'fileName="[^"]*.log"',
-                             'fileName="' + inFname + '.log"',
+                             'fileName="' + inFn + '.log"',
                              myLists["SE13"])
 
     # RE23
@@ -185,19 +180,19 @@ def generateBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'logEvery="' + str(logEvery) + '"',
                              myLists["RE23"])
     myLists["RE23"] = re.sub(r'fileName="[^"]*.trees"',
-                             'fileName="'+inFname+'.trees"',
+                             'fileName="' + inFn + '.trees"',
                              myLists["RE23"])
 
-    # MLE
-    myLists["MLE"] = re.sub(r'chainLength="[^"]*"',
-                            'chainLength="' + str(nGens) + '"',
-                            myLists["MLE"])
-    myLists["MLE"] = re.sub(r'logEvery="[^"]*"',
-                            'logEvery="' + str(logEvery) + '"',
-                            myLists["MLE"])
-    myLists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"',
-                            'fileName="' + inFname + '.MargLikeEst.log"',
-                            myLists["MLE"])
+#    # MLE
+#    myLists["MLE"] = re.sub(r'chainLength="[^"]*"',
+#                            'chainLength="' + str(nGens) + '"',
+#                            myLists["MLE"])
+#    myLists["MLE"] = re.sub(r'logEvery="[^"]*"',
+#                            'logEvery="' + str(logEvery) + '"',
+#                            myLists["MLE"])
+#    myLists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"',
+#                            'fileName="' + inFn + '.MargLikeEst.log"',
+#                            myLists["MLE"])
 
     results = myLists["SE1"] +\
         myLists["OT1b"] +\
@@ -238,22 +233,23 @@ def generateBEAST(myDict, myLists, inFname, nGens, logEvery, options):
         '\n\t\t\t</log>\n' +\
         myLists["RE23"] + '\n\n'
 
-    if options == "0":
-        results = results + myLists["SE15"]
+    results = results + myLists["SE15"]
 
-    if options == "1":
-        results = results + myLists["MLE"]
+#    if options == "0":
+#        results = results + myLists["SE15"]
+#    if options == "1":
+#        results = results + myLists["MLE"]
 
     return results
 
 
-def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
+def generateStarBEAST(inDict, myLists, inFn, nGens, logEvery):
 
     # Only relevant for *BEAST (i.e. species tree)
-    myLists["OT1a"] = OT1aGenerator(myDict).get_str()
+    myLists["OT1a"] = makeOT1a(inDict).get_str()
 
-    myLists["OT2"] = mke_OT2(myDict)
-    myLists["OT3"] = mke_OT3(myDict)
+    myLists["OT2"] = makeOT2(inDict)
+    myLists["OT3"] = makeOT3(inDict)
 
     # Replacements via RegEx
 
@@ -262,7 +258,7 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'chainLength="' + str(nGens) + '"',
                              myLists["SE10"])
     myLists["SE10"] = re.sub(r'operatorAnalysis="[^"]*.ops"',
-                             'operatorAnalysis="' + inFname + '.ops"',
+                             'operatorAnalysis="' + inFn + '.ops"',
                              myLists["SE10"])
 
     # SE12
@@ -275,7 +271,7 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'logEvery="' + str(logEvery) + '"',
                              myLists["SE13"])
     myLists["SE13"] = re.sub(r'fileName="[^"]*.log"',
-                             'fileName="' + inFname + '.log"',
+                             'fileName="' + inFn + '.log"',
                              myLists["SE13"])
 
     # SE14
@@ -283,7 +279,7 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'logEvery="' + str(logEvery) + '"',
                              myLists["SE14"])
     myLists["SE14"] = re.sub(r'fileName="[^"]*.species.trees"',
-                             'fileName="' + inFname + '.species.trees"',
+                             'fileName="' + inFn + '.species.trees"',
                              myLists["SE14"])
 
     # RE23
@@ -291,19 +287,19 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
                              'logEvery="' + str(logEvery) + '"',
                              '\n'.join(myLists["RE23"]))
     myLists["RE23"] = re.sub(r'fileName="[^"]*.gene',
-                             'fileName="' + inFname + '.gene',
+                             'fileName="' + inFn + '.gene',
                              myLists["RE23"])
 
-    # MLE
-    myLists["MLE"] = re.sub(r'chainLength="[^"]*"',
-                            'chainLength="' + str(nGens) + '"',
-                            myLists["MLE"])
-    myLists["MLE"] = re.sub(r'logEvery="[^"]*"',
-                            'logEvery="' + str(logEvery) + '"',
-                            myLists["MLE"])
-    myLists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"',
-                            'fileName="' + inFname + '.MargLikeEst.log"',
-                            myLists["MLE"])
+#    # MLE
+#    myLists["MLE"] = re.sub(r'chainLength="[^"]*"',
+#                            'chainLength="' + str(nGens) + '"',
+#                            myLists["MLE"])
+#    myLists["MLE"] = re.sub(r'logEvery="[^"]*"',
+#                            'logEvery="' + str(logEvery) + '"',
+#                            myLists["MLE"])
+#    myLists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"',
+#                            'fileName="' + inFn + '.MargLikeEst.log"',
+#                            myLists["MLE"])
 
     results = myLists["SE1"] +\
         myLists["OT1a"] +\
@@ -347,12 +343,22 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
         myLists["SE14"] + '\n\n' +\
         myLists["RE23"] + '\n\n'
 
-    if options == "0":
-        results = results + myLists["SE15"]
-    if options == "1":
-        results = results + myLists["MLE"]
+    results = results + myLists["SE15"]
+
+#    if options == "0":
+#        results = results + myLists["SE15"]
+#    if options == "1":
+#        results = results + myLists["MLE"]
 
     return results
+
+
+def addLeadZeros(inDict):
+    outDict = {}
+    for key in inDict:
+        newKey = key[0] + str(int(key[1:])).zfill(4)
+        outDict[newKey] = inDict[key].seq
+    return outDict
 
 
 ########
@@ -360,51 +366,58 @@ def generateStarBEAST(myDict, myLists, inFname, nGens, logEvery, options):
 ########
 
 
-def main(mode, pwd, inFname, nGens, options):
+def main(mode, pwd, inFn, nGens):
 
     # setting up logEvery for BEAST/*BEAST
     logEvery = str(int(nGens)/2000)
 
-    infile = open(pwd+inFname).read()
-
+    infile = open(pwd + "/" + inFn).read()
     # if infile contains multiple instances of "#NEXUS"
     if infile.count("#NEXUS") > 1:
         # split these instances, but keep the seperator (i.e. "#NEXUS")
-        alist = GSO.splitkeepsep(infile, "#NEXUS")
+        nxsList = GSO.splitkeepsep(infile, "#NEXUS")
         # remove all empty list elements
-        alist = filter(None, alist)
+        nxsList = filter(None, nxsList)
     else:
         # else, create a list with just one element
-        alist = [infile]
+        nxsList = [infile]
+
+    # Set up inFn without extension
+    inFnStem = GSO.rmext(inFn)
 
     # initialization with a default dictionary
     myLists = collections.defaultdict(list)
 
     if mode == "1":
-        print "    Selected mode:" + colored("BEAST", "magenta")
-        if options == "1":
-            print "    Adding code for:" +\
-                colored("Marginal Likelihoods", "magenta")
+        print "\tSelected mode: " + colored("BEAST", "magenta")
+#        if options == "1":
+#            print "\tAdding code for:" +\
+#                colored("Marginal Likelihoods", "magenta")
+
         # Showing progress bar
-        bar = Bar('    Generating XML files', max=len(alist))
-        # Loop through alist, also keep a cntr
-        for nxsCntr, element in enumerate(alist, start=1):
+        bar = Bar('\tGenerating XML files', max=len(nxsList))
+        # Loop through nxsList, also keep a cntr
+        for nxsCntr, elem in enumerate(nxsList, start=1):
             # convert string to file object
-            handle = StringIO(element)
+            handle = StringIO(elem)
             # read file object and parse into dictionary
-            myDict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))
-            filename = inFname[:-4]+".GeneTree.gene"+str(nxsCntr)
+            inDict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))
 
-        # Loading Alignment Repeating (AR) elements; inside the loop
-            myLists["AR1"] = mke_AR1(mode, nxsCntr, myDict)
+            # Convert keys in inDict to appropriate numbering
+            seqDict = addLeadZeros(inDict)
 
-        # Loading Repeating elements (RE); inside the loop
+            print seqDict
+
+            # Loading Alignment Repeating (AR) elements; inside the loop
+            myLists["AR1"] = makeAR1(mode, nxsCntr, seqDict)
+
+            # Loading Repeating elements (RE); inside the loop
             for REnmbr in range(1, 24):
-                myLists["RE" + str(REnmbr)] = mke_RE(mode, nxsCntr,
+                myLists["RE" + str(REnmbr)] = makeRE(mode, nxsCntr,
                                                      psd + "BARepo/",
                                                      "RE" + str(REnmbr))
 
-        # Loading Stationary elements (SE)
+            # Loading Stationary elements (SE)
             for SEnmbr in range(1, 16):
                 myLists["SE" + str(SEnmbr)] = open(psd + "BARepo/" +
                                                    "SE" + str(SEnmbr) +
@@ -415,62 +428,67 @@ def main(mode, pwd, inFname, nGens, options):
                                                    "SP" + str(SPnmbr) +
                                                    ".txt").read()
 
-        # Loading Marginal likelihood elements (MLE)
-            myLists["MLE"] = open(psd+"BARepo/"+"MLE.txt").read()
+#            # Loading Marginal likelihood elements (MLE)
+#            myLists["MLE"] = open(psd+"BARepo/"+"MLE.txt").read()
 
-            results = generateBEAST(myDict, myLists, filename,
-                                    nGens, logEvery, options)
+            fName = inFnStem + ".GeneTree.gene" + str(nxsCntr)
+            results = generateBEAST(seqDict, myLists,
+                                    fName, nGens, logEvery)
 
             # outF INSIDE the nxsCntr-loop
-            outF = open(pwd+filename+".xml", "w")
+            outF = open(pwd + "/" + fName + ".xml", "w")
             outF.write(results)
             outF.close()
             bar.next()
         bar.finish()
 
     if mode == "2":
-        print "    Selected mode:", colored("starBEAST", "magenta")
-        if options == "1":
-            print "    Adding code for:" +\
-                colored("Marginal Likelihoods", "magenta")
-        bar = Bar("    Generating XML files", max=len(alist))
-        # loop through alist, also keep a cntr
-        for nxsCntr, element in enumerate(alist, start=1):
+        print "\tSelected mode: " + colored("starBEAST", "magenta")
+#        if options == "1":
+#            print "    Adding code for:" +\
+#                colored("Marginal Likelihoods", "magenta")
+
+        bar = Bar("\tGenerating XML files", max=len(nxsList))
+        # loop through nxsList, also keep a cntr
+        for nxsCntr, elem in enumerate(nxsList, start=1):
             # convert string to file object
-            handle = StringIO(element)
+            handle = StringIO(elem)
             # read file object and parse into dictionary
-            myDict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))
+            inDict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))
+
+            # Convert keys in inDict to appropriate numbering
+            seqDict = addLeadZeros(inDict)
 
             # Loading Alignment Repeating (AR) elements; inside the loop
-            myLists["AR1"].append(mke_AR1(mode, nxsCntr, myDict))
+            myLists["AR1"].append(makeAR1(mode, nxsCntr, seqDict))
 
             # Loading Repeating elements (RE); inside the loop
             for REnmbr in range(1, 24):
-                myLists["RE"+str(REnmbr)].append(mke_RE(mode, nxsCntr,
-                                                        psd + "BARepo/",
-                                                        "RE" + str(REnmbr)))
+                myLists["RE"+str(REnmbr)].append(
+                    makeRE(mode, nxsCntr, psd + "BARepo/", "RE" + str(REnmbr)))
 
             bar.next()
 
         # Loading Stationary elements (SE); outside the loop
         # must not be in for-loop from above
         for SEnmbr in range(1, 16):
-            myLists["SE"+str(SEnmbr)] = open(psd + "BARepo/" +
-                                             "SE" + str(SEnmbr) +
-                                             ".txt").read()
+            myLists["SE" + str(SEnmbr)] = open(psd + "BARepo/" +
+                                               "SE" + str(SEnmbr) +
+                                               ".txt").read()
 
-        # Loading Marginal likelihood elements (MLE); outside the loop
-        myLists["MLE"] = open(psd + "BARepo/" + "MLE.txt").read()
+#        # Loading Marginal likelihood elements (MLE); outside the loop
+#        myLists["MLE"] = open(psd + "BARepo/" + "MLE.txt").read()
 
-        filename = GSO.rmext(inFname) + ".SpeciesTree"
-        results = generateStarBEAST(myDict, myLists, filename,
-                                    nGens, logEvery, options)
+        fName = inFnStem + ".SpeciesTree"
+        results = generateStarBEAST(seqDict, myLists,
+                                    fName, nGens, logEvery)
 
         # outF OUTSIDE the nxsCntr-loop
-        outF = open(pwd+filename+".xml", "w")
+        outF = open(pwd + "/" + fName + ".xml", "w")
         outF.write(results)
         outF.close()
         bar.finish()
+
 
 ###########
 # EXECUTE #
@@ -500,26 +518,26 @@ if __name__ == '__main__':
                         required=True)
 
     parser.add_argument('-i',
-                        '--infilename',
+                        '--infile',
                         help='name of input NEXUS file',
                         default="test.nex",
                         required=True)
 
     parser.add_argument('-g',
-                        '--generations',
+                        '--gens',
                         help='number of MCMC generations',
                         default="50000000",
                         required=True)
 
-    parser.add_argument('-o',
-                        '--options',
-                        help='0 = none, 1 = Marginal Likelihood Estimation',
-                        default="0",
-                        required=False)
+#    parser.add_argument('-o',
+#                        '--options',
+#                        help='0 = none, 1 = Marginal Likelihood Estimation',
+#                        default="0",
+#                        required=False)
 
     args = parser.parse_args()
 
-main(args.mode, args.pwd, args.infilename, args.generations, args.options)
+main(args.mode, args.pwd, args.infile, args.gens)
 
 print ""
 print colored("    Done.", 'cyan')
