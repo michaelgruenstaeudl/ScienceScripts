@@ -127,10 +127,54 @@ def makeRE(mode, cntr, pwd, filePrefix):
                 .replace("alignmentNN", "alignment" + cntr))
 
 
-def generateBEAST(inDict, myLists, inFn, nGens, logEvery):
+def makeModel(mode, modelDict, cntr, pwd, filePrefix):
+
+    if not modelDict["nst"]:
+        handle = open(pwd + filePrefix + ".txt").read()
+
+    if modelDict["nst"]:
+
+        # Calculate base frequencies
+        baseFreqs = modelDict["base"].strip("(").rstrip(")").split()
+        baseFreqs.append(str(1-sum([float(x) for x in baseFreqs])))
+        baseFreqs = " ".join(baseFreqs)
+
+        if modelDict["nst"] == "2":
+            handle = open(pwd + filePrefix + "_HKY" + ".txt").read()
+            # Replace base frequencies
+            handle = handle.replace("baseFreqs", baseFreqs)
+            # Replace Kappa values
+            handle = handle.replace('kappa" value="2.0"',
+                                    'kappa" value="' + modelDict["base"] + '"')
+            # Adding site model info
+            handle += '\t\t<HKYModel idref="hky"/>'
+
+        if modelDict["nst"] == "6":
+            handle = open(pwd + filePrefix + "_GTR" + ".txt").read()
+            # Replace base frequencies
+            handle = handle.replace("baseFreqs", baseFreqs)
+            # Replace substitution rates
+            substRates = modelDict["rmat"].strip("(").rstrip(")").split()
+            for rate in substRates:
+                handle = handle.replace('value="1.0"', 'value="' + rate + '"')
+            # Adding site model info
+            handle += '\t\t<gtrModel idref="gtr"/>'
+
+    # Closing site model info
+    handle += "\n".join(['\t</substitutionModel>','\t</siteModel>\n'])
+
+    if mode == "1":
+        return (handle.replace("gene_NN.", "")
+                .replace("alignmentNN", "alignment"))
+    if mode == "2":
+        return (handle.replace("gene_NN", "gene" + cntr)
+                .replace("alignmentNN", "alignment" + cntr))
+
+
+def generateBEAST(seqDict, myLists, inFn, nGens, logEvery):
 
     # Loading One-Time (OT) elements; outside the loop
-    myLists["OT1b"] = makeOT1b(inDict)
+    myLists["OT1b"] = makeOT1b(seqDict)
 
     # Replacements via RegEx
     # difference between BEAST and starBEAST
@@ -179,6 +223,7 @@ def generateBEAST(inDict, myLists, inFn, nGens, logEvery):
     myLists["RE23"] = re.sub(r'logEvery="[^"]*"',
                              'logEvery="' + str(logEvery) + '"',
                              myLists["RE23"])
+
     myLists["RE23"] = re.sub(r'fileName="[^"]*.trees"',
                              'fileName="' + inFn + '.trees"',
                              myLists["RE23"])
@@ -243,13 +288,13 @@ def generateBEAST(inDict, myLists, inFn, nGens, logEvery):
     return results
 
 
-def generateStarBEAST(inDict, myLists, inFn, nGens, logEvery):
+def generateStarBEAST(seqDict, myLists, inFn, nGens, logEvery):
 
     # Only relevant for *BEAST (i.e. species tree)
-    myLists["OT1a"] = makeOT1a(inDict).get_str()
+    myLists["OT1a"] = makeOT1a(seqDict).get_str()
 
-    myLists["OT2"] = makeOT2(inDict)
-    myLists["OT3"] = makeOT3(inDict)
+    myLists["OT2"] = makeOT2(seqDict)
+    myLists["OT3"] = makeOT3(seqDict)
 
     # Replacements via RegEx
 
@@ -361,6 +406,24 @@ def addLeadZeros(inDict):
     return outDict
 
 
+def extractModelInfo(inStr):
+    # 1. Extract lines that starts with "lset"
+    found = re.search("lset(.+?)\n", inStr).group(1)
+    if found:
+        modelDict = {}
+        # EXAMPLE: "set crit=like; lset clock=no nst=6 base=(0.21901 0.26151 0.36629) rmat=(1.000000 5.187448 0.293936 0.293936 5.187448) rclass=(a b c c b a) rates=equal pinv=0.832102;"
+        # remove trailing ";"
+        tmpStr = found.rstrip(";")
+        # remove info on "rclass"
+        tmpStr = re.sub(r'rclass=(.+?)\)', '', tmpStr)
+        # http://stackoverflow.com/questions/25518647/re-split-unless-following-character-an-integer-in-python/25518698#25518698
+        aList = filter(None, re.split(r' (?!\d)', tmpStr))
+        for elem in aList:
+            bList = re.split('=', elem)
+            modelDict[bList[0]] = bList[1]
+    return modelDict
+
+
 ########
 # MAIN #
 ########
@@ -369,7 +432,7 @@ def addLeadZeros(inDict):
 def main(mode, pwd, inFn, nGens):
 
     # setting up logEvery for BEAST/*BEAST
-    logEvery = str(int(nGens)/2000)
+    logEvery = str(int(nGens)/5000)
 
     infile = open(pwd + "/" + inFn).read()
     # if infile contains multiple instances of "#NEXUS"
@@ -396,11 +459,16 @@ def main(mode, pwd, inFn, nGens):
 
         # Showing progress bar
         bar = Bar('\tGenerating XML files', max=len(nxsList))
+
         # Loop through nxsList, also keep a cntr
         for nxsCntr, elem in enumerate(nxsList, start=1):
-            # convert string to file object
+
+            # Extract model information
+            modelDict = extractModelInfo(elem)
+
+            # Convert string to file object
             handle = StringIO(elem)
-            # read file object and parse into dictionary
+            # Read file object and parse into dictionary
             inDict = SeqIO.to_dict(SeqIO.parse(handle, "nexus"))
 
             # Convert keys in inDict to appropriate numbering
@@ -410,11 +478,15 @@ def main(mode, pwd, inFn, nGens):
             myLists["AR1"] = makeAR1(mode, str(nxsCntr).zfill(3), seqDict)
 
             # Loading Repeating elements (RE); inside the loop
-            for REnmbr in range(1, 24):
-                myLists["RE" + str(REnmbr)] = makeRE(mode, 
-                                                     str(nxsCntr).zfill(3),
-                                                     psd + "BARepo/",
-                                                     "RE" + str(REnmbr))
+            for REnmbr in range(1, 4)+range(6, 24):
+                myLists["RE" + str(REnmbr)].append(
+                    makeRE(mode, str(nxsCntr).zfill(3),
+                           psd + "BARepo/", "RE" + str(REnmbr)))
+
+            # Special case: Model info
+            myLists["RE" + str(5)].append(
+                makeModel(mode, modelDict, str(nxsCntr).zfill(3),
+                          psd + "BARepo/", "RE" + str(5)))
 
             # Loading Stationary elements (SE)
             for SEnmbr in range(1, 16):
@@ -450,6 +522,10 @@ def main(mode, pwd, inFn, nGens):
         bar = Bar("\tGenerating XML files", max=len(nxsList))
         # loop through nxsList, also keep a cntr
         for nxsCntr, elem in enumerate(nxsList, start=1):
+
+            # Extract model information
+            modelDict = extractModelInfo(elem)
+
             # convert string to file object
             handle = StringIO(elem)
             # read file object and parse into dictionary
@@ -465,9 +541,14 @@ def main(mode, pwd, inFn, nGens):
 
             # Loading Repeating elements (RE); inside the loop
             for REnmbr in range(1, 24):
-                myLists["RE"+str(REnmbr)].append(
-                    makeRE(mode, str(nxsCntr).zfill(3),
-                           psd + "BARepo/", "RE" + str(REnmbr)))
+                if REnmbr == 5:
+                    myLists["RE"+str(REnmbr)].append(
+                        makeModel(mode, modelDict, str(nxsCntr).zfill(3),
+                               psd + "BARepo/", "RE" + str(REnmbr)))
+                if REnmbr != 5:
+                    myLists["RE"+str(REnmbr)].append(
+                        makeRE(mode, str(nxsCntr).zfill(3),
+                               psd + "BARepo/", "RE" + str(REnmbr)))
 
             bar.next()
 

@@ -1,0 +1,17 @@
+    <!-- The HKY substitution model (Hasegawa, Kishino & Yano, 1985)             -->
+    <HKYModel id="gene_NN.hky">
+        <frequencies>
+            <frequencyModel dataType="nucleotide">
+                <frequencies>
+                    <parameter id="gene_NN.frequencies" value="baseFreqs"/>
+                </frequencies>
+            </frequencyModel>
+        </frequencies>
+        <kappa>
+            <parameter id="gene_NN.kappa" value="2.0" lower="0.0"/>
+        </kappa>
+    </HKYModel>
+
+    <!-- site model                                                              -->
+    <siteModel id="siteModel">
+        <substitutionModel>
