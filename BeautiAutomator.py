@@ -134,10 +134,14 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
 
     if modelDict["nst"]:
 
-        # Calculate base frequencies
-        baseFreqs = modelDict["base"].strip("(").rstrip(")").split()
-        baseFreqs.append(str(1-sum([float(x) for x in baseFreqs])))
-        baseFreqs = " ".join(baseFreqs)
+        if modelDict["base"] != "equal":
+            # Calculate base frequencies
+            baseFreqs = modelDict["base"].strip("(").rstrip(")").split()
+            baseFreqs.append(str(1-sum([float(x) for x in baseFreqs])))
+            baseFreqs = " ".join(baseFreqs)
+
+        if modelDict["base"] == "equal":
+            baseFreqs = "0.25 0.25 0.25 0.25"
 
         if modelDict["nst"] == "2":
             handle = open(pwd + filePrefix + "_HKY" + ".txt").read()
@@ -147,7 +151,7 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             handle = handle.replace('kappa" value="2.0"',
                                     'kappa" value="' + modelDict["base"] + '"')
             # Adding site model info
-            handle += '\t\t<HKYModel idref="hky"/>'
+            handle += '\t\t\t<HKYModel idref="hky"/>'
 
         if modelDict["nst"] == "6":
             handle = open(pwd + filePrefix + "_GTR" + ".txt").read()
@@ -156,12 +160,12 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             # Replace substitution rates
             substRates = modelDict["rmat"].strip("(").rstrip(")").split()
             for rate in substRates:
-                handle = handle.replace('value="1.0"', 'value="' + rate + '"')
+                handle = handle.replace('value="1.0"', 'value="'+rate+'"', 1)
             # Adding site model info
-            handle += '\t\t<gtrModel idref="gtr"/>'
+            handle += '\t\t\t<gtrModel idref="gtr"/>'
 
     # Closing site model info
-    handle += "\n".join(['\t</substitutionModel>','\t</siteModel>\n'])
+    handle += '\n\t\t</substitutionModel>\n\t</siteModel>\n'
 
     if mode == "1":
         return (handle.replace("gene_NN.", "")
@@ -239,6 +243,10 @@ def generateBEAST(seqDict, myLists, inFn, nGens, logEvery):
 #                            'fileName="' + inFn + '.MargLikeEst.log"',
 #                            myLists["MLE"])
 
+    for i in myLists:
+        print i
+        print(type(i))
+
     results = myLists["SE1"] +\
         myLists["OT1b"] +\
         myLists["SE2"] + '\n\n' +\
@@ -261,8 +269,9 @@ def generateBEAST(seqDict, myLists, inFn, nGens, logEvery):
         myLists["RE13"] + '\n\n' +\
         myLists["RE14"] + '\n\n' +\
         myLists["SE11"] + '\n\n' +\
-        '\t\t\t\t<coalescentLikelihood idref="coalescent"/>' +\
-        '\n\t\t\t</prior>\n\t\t\t<likelihood id="likelihood">\n' +\
+        '\t\t\t\t<coalescentLikelihood idref="coalescent"/>\n' +\
+        '\t\t\t</prior>\n' +\
+        '\t\t\t<likelihood id="likelihood">\n' +\
         myLists["RE15"] +\
         myLists["SE12"] + '\n\n' +\
         myLists["RE16"] + '\n\n' +\
@@ -274,11 +283,10 @@ def generateBEAST(seqDict, myLists, inFn, nGens, logEvery):
         myLists["RE20"] +\
         myLists["RE21"] +\
         myLists["RE22"] +\
-        '\t\t\t<coalescentLikelihood idref="coalescent"/>' +\
-        '\n\t\t\t</log>\n' +\
-        myLists["RE23"] + '\n\n'
-
-    results = results + myLists["SE15"]
+        '\t\t\t<coalescentLikelihood idref="coalescent"/>\n' +\
+        '\t\t\t</log>\n' +\
+        myLists["RE23"] + '\n\n' +\
+        myLists["SE15"]
 
 #    if options == "0":
 #        results = results + myLists["SE15"]
@@ -331,6 +339,7 @@ def generateStarBEAST(seqDict, myLists, inFn, nGens, logEvery):
     myLists["RE23"] = re.sub(r'logEvery="[^"]*"',
                              'logEvery="' + str(logEvery) + '"',
                              '\n'.join(myLists["RE23"]))
+
     myLists["RE23"] = re.sub(r'fileName="[^"]*.gene',
                              'fileName="' + inFn + '.gene',
                              myLists["RE23"])
@@ -386,9 +395,8 @@ def generateStarBEAST(seqDict, myLists, inFn, nGens, logEvery):
         '\n'.join(myLists["RE21"]) + '\n\n' +\
         '\n'.join(myLists["RE22"]) +\
         myLists["SE14"] + '\n\n' +\
-        myLists["RE23"] + '\n\n'
-
-    results = results + myLists["SE15"]
+        myLists["RE23"] + '\n\n' +\
+        myLists["SE15"]
 
 #    if options == "0":
 #        results = results + myLists["SE15"]
@@ -478,15 +486,15 @@ def main(mode, pwd, inFn, nGens):
             myLists["AR1"] = makeAR1(mode, str(nxsCntr).zfill(3), seqDict)
 
             # Loading Repeating elements (RE); inside the loop
-            for REnmbr in range(1, 4)+range(6, 24):
-                myLists["RE" + str(REnmbr)].append(
-                    makeRE(mode, str(nxsCntr).zfill(3),
-                           psd + "BARepo/", "RE" + str(REnmbr)))
+            for REnmbr in range(1, 5)+range(6, 24):
+                myLists["RE" + str(REnmbr)] = makeRE(mode,
+                                                     str(nxsCntr).zfill(3),
+                                                     psd + "BARepo/",
+                                                     "RE" + str(REnmbr))
 
-            # Special case: Model info
-            myLists["RE" + str(5)].append(
-                makeModel(mode, modelDict, str(nxsCntr).zfill(3),
-                          psd + "BARepo/", "RE" + str(5)))
+            # Special RE case: Model info
+            myLists["RE5"] = makeModel(mode, modelDict, str(nxsCntr).zfill(3),
+                                       psd + "BARepo/", "RE5")
 
             # Loading Stationary elements (SE)
             for SEnmbr in range(1, 16):
@@ -503,6 +511,7 @@ def main(mode, pwd, inFn, nGens):
 #            myLists["MLE"] = open(psd+"BARepo/"+"MLE.txt").read()
 
             fName = inFnStem + ".GeneTree.gene" + str(nxsCntr).zfill(3)
+
             results = generateBEAST(seqDict, myLists,
                                     fName, nGens, logEvery)
 
@@ -540,15 +549,19 @@ def main(mode, pwd, inFn, nGens):
                                           seqDict))
 
             # Loading Repeating elements (RE); inside the loop
-            for REnmbr in range(1, 24):
-                if REnmbr == 5:
-                    myLists["RE"+str(REnmbr)].append(
-                        makeModel(mode, modelDict, str(nxsCntr).zfill(3),
-                               psd + "BARepo/", "RE" + str(REnmbr)))
-                if REnmbr != 5:
-                    myLists["RE"+str(REnmbr)].append(
-                        makeRE(mode, str(nxsCntr).zfill(3),
-                               psd + "BARepo/", "RE" + str(REnmbr)))
+            for REnmbr in range(1, 4)+range(6, 24):
+                myLists["RE" + str(REnmbr)].append(
+                    makeRE(mode,
+                           str(nxsCntr).zfill(3),
+                           psd + "BARepo/",
+                           "RE" + str(REnmbr)))
+
+            # Special RE case: Model info
+            myLists["RE5"].append(
+                makeModel(mode,
+                          modelDict,
+                          str(nxsCntr).zfill(3),
+                          psd + "BARepo/", "RE5"))
 
             bar.next()
 
@@ -563,6 +576,12 @@ def main(mode, pwd, inFn, nGens):
 #        myLists["MLE"] = open(psd + "BARepo/" + "MLE.txt").read()
 
         fName = inFnStem + ".SpeciesTree"
+
+        # DEBUGGING
+        for i in myLists:
+            print i
+            print type(i)
+
         results = generateStarBEAST(seqDict, myLists,
                                     fName, nGens, logEvery)
 
