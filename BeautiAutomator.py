@@ -3,7 +3,7 @@
 and *BEAST.'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.08.25.2000"
+__version__ = "2014.08.27.0300"
 __status__ = "Working"
 
 #####################
@@ -164,6 +164,20 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             # Adding site model info
             handle += '\t\t\t<gtrModel idref="gtr"/>'
 
+    if modelDict["pinv"]:
+        handle += ''.join(['\t\t<proportionInvariant>\n',
+                           '\t\t\t<parameter id="pInv" value="0.5" lower="0.0" upper="1.0"/>\n',
+                           '\t\t</proportionInvariant>\n'])
+        handle = handle.replace('pInv" value="0.5"',
+                                'pInv" value="'+modelDict["pinv"]+'"')
+
+    if modelDict["rates"] == "gamma":
+        handle += ''.join(['\t\t<gammaShape gammaCategories="4">\n',
+                           '\t\t\t<parameter id="alpha" value="0.5" lower="0.0"/>\n',
+                           '\t\t</gammaShape>\n'])
+        handle = handle.replace('alpha" value="0.5"',
+                                'alpha" value="'+modelDict["shape"]+'"')
+
     # Closing site model info
     handle += '\n\t\t</substitutionModel>\n\t</siteModel>\n'
 
@@ -242,10 +256,6 @@ def generateBEAST(seqDict, myLists, inFn, nGens, logEvery):
 #    myLists["MLE"] = re.sub(r'fileName="[^"]*.MargLikeEst.log"',
 #                            'fileName="' + inFn + '.MargLikeEst.log"',
 #                            myLists["MLE"])
-
-    for i in myLists:
-        print i
-        print(type(i))
 
     results = myLists["SE1"] +\
         myLists["OT1b"] +\
@@ -576,11 +586,6 @@ def main(mode, pwd, inFn, nGens):
 #        myLists["MLE"] = open(psd + "BARepo/" + "MLE.txt").read()
 
         fName = inFnStem + ".SpeciesTree"
-
-        # DEBUGGING
-        for i in myLists:
-            print i
-            print type(i)
 
         results = generateStarBEAST(seqDict, myLists,
                                     fName, nGens, logEvery)
