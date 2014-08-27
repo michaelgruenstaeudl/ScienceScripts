@@ -8,22 +8,22 @@
             </frequencyModel>
         </frequencies>
         <rateAC>
-            <parameter id="ac" value="1.0" lower="0.0"/>
+            <parameter id="gene_NN.ac" value="1.0" lower="0.0"/>
         </rateAC>
         <rateAG>
-            <parameter id="ag" value="1.0" lower="0.0"/>
+            <parameter id="gene_NN.ag" value="1.0" lower="0.0"/>
         </rateAG>
         <rateAT>
-            <parameter id="at" value="1.0" lower="0.0"/>
+            <parameter id="gene_NN.at" value="1.0" lower="0.0"/>
         </rateAT>
         <rateCG>
-            <parameter id="cg" value="1.0" lower="0.0"/>
+            <parameter id="gene_NN.cg" value="1.0" lower="0.0"/>
         </rateCG>
         <rateGT>
-            <parameter id="gt" value="1.0" lower="0.0"/>
+            <parameter id="gene_NN.gt" value="1.0" lower="0.0"/>
         </rateGT>
     </gtrModel>
 
     <!-- site model                                                              -->
-    <siteModel id="siteModel">
+    <siteModel id="gene_NN.siteModel">
         <substitutionModel>

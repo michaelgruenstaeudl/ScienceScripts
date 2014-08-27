@@ -1,0 +1,6 @@
+				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0" meanInRealSpace="false">
+					<parameter idref="gene_NN.kappa"/>
+				</logNormalPrior>
+				<uniformPrior lower="0.0" upper="1.0">
+					<parameter idref="gene_NN.frequencies"/>
+				</uniformPrior>

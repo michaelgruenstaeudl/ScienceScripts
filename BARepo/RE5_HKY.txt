@@ -13,5 +13,5 @@
     </HKYModel>
 
     <!-- site model                                                              -->
-    <siteModel id="siteModel">
+    <siteModel id="gene_NN.siteModel">
         <substitutionModel>

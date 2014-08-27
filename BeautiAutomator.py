@@ -149,9 +149,9 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             handle = handle.replace("baseFreqs", baseFreqs)
             # Replace Kappa values
             handle = handle.replace('kappa" value="2.0"',
-                                    'kappa" value="' + modelDict["base"] + '"')
+                                    'kappa" value="' + modelDict["tratio"] + '"')
             # Adding site model info
-            handle += '\t\t\t<HKYModel idref="hky"/>'
+            handle += '\t\t\t<HKYModel idref="gene_NN.hky"/>'
 
         if modelDict["nst"] == "6":
             handle = open(pwd + filePrefix + "_GTR" + ".txt").read()
@@ -162,18 +162,18 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             for rate in substRates:
                 handle = handle.replace('value="1.0"', 'value="'+rate+'"', 1)
             # Adding site model info
-            handle += '\t\t\t<gtrModel idref="gtr"/>'
+            handle += '\t\t\t<gtrModel idref="gene_NN.gtr"/>'
 
     if modelDict["pinv"]:
-        handle += ''.join(['\t\t<proportionInvariant>\n',
-                           '\t\t\t<parameter id="pInv" value="0.5" lower="0.0" upper="1.0"/>\n',
+        handle += ''.join(['\n\t\t<proportionInvariant>\n',
+                           '\t\t\t<parameter id="gene_NN.pInv" value="0.5" lower="0.0" upper="1.0"/>\n',
                            '\t\t</proportionInvariant>\n'])
         handle = handle.replace('pInv" value="0.5"',
                                 'pInv" value="'+modelDict["pinv"]+'"')
 
     if modelDict["rates"] == "gamma":
         handle += ''.join(['\t\t<gammaShape gammaCategories="4">\n',
-                           '\t\t\t<parameter id="alpha" value="0.5" lower="0.0"/>\n',
+                           '\t\t\t<parameter id="gene_NN.alpha" value="0.5" lower="0.0"/>\n',
                            '\t\t</gammaShape>\n'])
         handle = handle.replace('alpha" value="0.5"',
                                 'alpha" value="'+modelDict["shape"]+'"')
@@ -559,7 +559,7 @@ def main(mode, pwd, inFn, nGens):
                                           seqDict))
 
             # Loading Repeating elements (RE); inside the loop
-            for REnmbr in range(1, 4)+range(6, 24):
+            for REnmbr in range(1, 5)+range(6, 24):
                 myLists["RE" + str(REnmbr)].append(
                     makeRE(mode,
                            str(nxsCntr).zfill(3),
