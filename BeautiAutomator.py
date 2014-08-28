@@ -140,7 +140,7 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             baseFreqs.append(str(1-sum([float(x) for x in baseFreqs])))
             baseFreqs = " ".join(baseFreqs)
 
-        if modelDict["base"] == "equal":
+        else:
             baseFreqs = "0.25 0.25 0.25 0.25"
 
         if modelDict["nst"] == "2":
@@ -164,14 +164,14 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             # Adding site model info
             handle += '\t\t\t<gtrModel idref="gene_NN.gtr"/>'
 
-    if modelDict["pinv"]:
+    if "pinv" in modelDict:
         handle += ''.join(['\n\t\t<proportionInvariant>\n',
                            '\t\t\t<parameter id="gene_NN.pInv" value="0.5" lower="0.0" upper="1.0"/>\n',
                            '\t\t</proportionInvariant>\n'])
         handle = handle.replace('pInv" value="0.5"',
                                 'pInv" value="'+modelDict["pinv"]+'"')
 
-    if modelDict["rates"] == "gamma":
+    if "rates" in modelDict and modelDict["rates"] == "gamma":
         handle += ''.join(['\t\t<gammaShape gammaCategories="4">\n',
                            '\t\t\t<parameter id="gene_NN.alpha" value="0.5" lower="0.0"/>\n',
                            '\t\t</gammaShape>\n'])
