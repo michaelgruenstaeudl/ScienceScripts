@@ -13,7 +13,7 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script that wraps the commands necessary to perform a posterior predictive checking of the coalescent model"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.08.21.1800"
+VERSION="2014.08.27.2300"
 USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
 
 ################################################################################
@@ -94,9 +94,9 @@ echo ""
 echo -e " ${blue}Conducting file hygiene ...${nocolor}"
 echo ""
 
-mv $INFILE.PRMT $INFILE.RSLT $ABS_PATH_TO_OUTDIR/
-tar czf $INFILE.PRMT.tar.gz $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
-rm Rcmds.$INFILE.R
+mv $INFILE.PRMT $INFILE.RSLT $INFILE.*.R $ABS_PATH_TO_OUTDIR/
+tar czf $ABS_PATH_TO_OUTDIR/$INFILE.PRMT.tar.gz $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
+rm $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
 cd ~
 
 ################################################################################
