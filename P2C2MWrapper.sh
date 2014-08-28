@@ -94,9 +94,10 @@ echo ""
 echo -e " ${blue}Conducting file hygiene ...${nocolor}"
 echo ""
 
-mv $INFILE.PRMT $INFILE.RSLT $INFILE.*.R $ABS_PATH_TO_OUTDIR/
-tar czf $ABS_PATH_TO_OUTDIR/$INFILE.PRMT.tar.gz $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
-rm $ABS_PATH_TO_OUTDIR/$INFILE.PRMT
+tar czf $INFILE.PRMT.tar.gz $INFILE.PRMT
+rm $INFILE.PRMT
+mv $INFILE.PRMT.tar.gz $INFILE.RSLT $INFILE.*.R $ABS_PATH_TO_OUTDIR/
+
 cd ~
 
 ################################################################################
