@@ -2,7 +2,7 @@
 '''Converting a species tree string from the *BEAST format to the PHYBASE format.'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.07.09.2300"
+__version__ = "2014.09.01.2300"
 __status__ = "Working"
 
 #########################
@@ -10,7 +10,10 @@ __status__ = "Working"
 #########################
 
 from termcolor import colored
-import argparse, dendropy, numpy, sys
+import argparse
+import dendropy
+import numpy
+import sys
 sys.path.insert(0,"/home/michael/git/ScienceScripts/")
 import GeneralStringOperations as GSO
 
@@ -34,6 +37,12 @@ def changing_location_of_metadata(pathAndInfilename):
         nodes = tree.nodes()
         # Looping over every node of a given tree
         for node in nodes:
+
+            # Converting branch lengths in e-notation to decimal format
+            if node.edge_length:
+                node.edge_length = "%.12f" % (node.edge_length)
+
+            # Dealing with dmv-values
             handle = node.annotations.get_value("dmv")
             # Decision tree regarding different BEAUTi versions
             # For BEAUTi v1.7 and lower, b/c dmv = '0.15':
@@ -50,6 +59,7 @@ def changing_location_of_metadata(pathAndInfilename):
     outData = inData.as_string("nexus")
     return outData
 
+
 def converting_dmv_to_theta(inList):
     ''' Converting the dmv values (always 2 per node) to a theta value
         inList: dmv = ['0.1','0.2'] '''
@@ -63,10 +73,14 @@ def converting_dmv_to_theta(inList):
     outValue = str(round(tmpValue, 4))
     return outValue
 
+
 def formatting_tree_string(inString):
     ''' Formatting a tree string '''
     # Convert entire string into upper case
-    # My Rule: "species tree stuff is alays in upper case"
+    # My Rule: "species tree stuff is always in upper case"
+
+    print(inString)
+
     handle = inString.upper()
     # Remove "taxa" section of nexus file
     handle = handle.replace(handle[handle.find("BEGIN TAXA;"):handle.find("END;", \
@@ -80,6 +94,7 @@ def formatting_tree_string(inString):
 ############
 ### MAIN ###
 ############
+
 
 def main(pathAndInfilename):
     # Conducting main functions
