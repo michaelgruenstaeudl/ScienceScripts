@@ -78,9 +78,6 @@ def formatting_tree_string(inString):
     ''' Formatting a tree string '''
     # Convert entire string into upper case
     # My Rule: "species tree stuff is always in upper case"
-
-    print(inString)
-
     handle = inString.upper()
     # Remove "taxa" section of nexus file
     handle = handle.replace(handle[handle.find("BEGIN TAXA;"):handle.find("END;", \
