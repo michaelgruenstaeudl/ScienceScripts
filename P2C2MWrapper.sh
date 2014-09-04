@@ -78,7 +78,7 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "source('/home/michael/git/osu_eeob_gruenstaeudl/P2C2M/wrapper.R')" > Rcmds.$INFILE.R
+echo "source('/home/michael/git/Gruenstaeudl_PPS/P2C2M/wrapper.R')" > Rcmds.$INFILE.R
 echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME','$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
 echo "warnings()" >> Rcmds.$INFILE.R
 echo "q()" >> Rcmds.$INFILE.R
