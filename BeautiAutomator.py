@@ -18,6 +18,7 @@ import sys
 import xml.etree.ElementTree as ET
 from Bio import SeqIO
 from cStringIO import StringIO
+from itertools import groupby
 from progress.bar import Bar
 from termcolor import colored
 
@@ -134,7 +135,7 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
 
     if modelDict["nst"]:
 
-        if modelDict["base"] != "equal":
+        if "base" in modelDict and modelDict["base"] != "equal":
             # Calculate base frequencies
             baseFreqs = modelDict["base"].strip("(").rstrip(")").split()
             baseFreqs.append(str(1-sum([float(x) for x in baseFreqs])))
@@ -157,11 +158,12 @@ def makeModel(mode, modelDict, cntr, pwd, filePrefix):
             handle = open(pwd + filePrefix + "_GTR" + ".txt").read()
             # Replace base frequencies
             handle = handle.replace("baseFreqs", baseFreqs)
-            # Replace substitution rates
-            substRates = modelDict["rmat"].strip("(").rstrip(")").split()
-            for rate in substRates:
-                handle = handle.replace('value="1.0"', 'value="'+rate+'"', 1)
-            # Adding site model info
+            if "rmat" in modelDict:
+                # Replace substitution rates
+                substRates = modelDict["rmat"].strip("(").rstrip(")").split()
+                for rate in substRates:
+                    handle = handle.replace('value="1.0"', 'value="'+rate+'"', 1)
+                # Adding site model info
             handle += '\t\t\t<gtrModel idref="gene_NN.gtr"/>'
 
     if "pinv" in modelDict:
@@ -419,7 +421,12 @@ def generateStarBEAST(seqDict, myLists, inFn, nGens, logEvery):
 def addLeadZeros(inDict):
     outDict = {}
     for key in inDict:
-        newKey = key[0] + str(int(key[1:])).zfill(4)
+        # separate key into letters and trailing numbers
+        keySplit = [''.join(g) for _, g in groupby(key, str.isdigit)]
+        if keySplit[-1].isdigit():
+            newKey = ''.join(keySplit[:-1]) + str(int(keySplit[-1])).zfill(4)
+        else:
+            newKey = key
         outDict[newKey] = inDict[key].seq
     return outDict
 

@@ -67,7 +67,7 @@
 			<parameter idref="speciesTree.splitPopSize"/>
 		</data>
 		<indicators>
-			<parameter value="1 1 1 1 0 0 0 0 0 0"/>
+			<parameter value="0 0 0 0 0 0 0 0 0 0"/>
 		</indicators>
 	</mixedDistributionLikelihood>
 
