@@ -10,13 +10,14 @@
   #print(variable)
   #cat("\n***DEGUB - END***\n\n")
 
-makeHudsonMSCmd = function(spTree, nAlleles=10) {
+makeHudsonMSCmd = function(spTree, popSize=5, nAlleles=10) {
 
   # Description:    Generating gene trees via Hudson's ms   
   # Dependencies:   -
-  # InVariables:    spTree:     the species tree; 
-  #                             the outgroup MUST be the last tip.label
+  # InVariables:    spTree:     the species tree; tree must be of class "phylo"
+  #                 popSize:    the average population size
   #                 nAlleles:   number of alleles to be generated
+  # Notes:          REQUIREMENT: the outgroup MUST be the last tip.label
 
   library('ape')
   library('adephylo')
@@ -36,11 +37,11 @@ makeHudsonMSCmd = function(spTree, nAlleles=10) {
         # The above problem would occur, for example, if two monophyletic 
         # groups of same rank.
         if (!lastTip %in% terminals) {
-            mergers = c(mergers, paste(firstTip, lastTip))
+            mergers = c(mergers, paste(lastTip, firstTip))
             terminals = c(terminals, lastTip)
         }
         else {
-            mergers = c(mergers, paste(lastTip, firstTip))
+            mergers = c(mergers, paste(firstTip, lastTip))
         }
         if (!firstTip %in% terminals) { terminals = c(terminals, firstTip) }
     }
@@ -56,9 +57,9 @@ makeHudsonMSCmd = function(spTree, nAlleles=10) {
   ## Generate population matrix
     # Generate a list with as many as entries as the tree has tip.labels
     # and fill them with popsize=5
-    popList = rep(5, length(spTree$tip.label))
+    popList = rep(popSize, length(spTree$tip.label))
     # Give column names to list entries
-    names(popList) = paste("pop", 1:length(tree$tip.label), sep="")
+    names(popList) = paste("pop", 1:length(spTree$tip.label), sep="")
     # Last list entry constitutes outgroup; hence, give it popsize=1
     popList[length(popList)] = 1
 
@@ -70,7 +71,9 @@ makeHudsonMSCmd = function(spTree, nAlleles=10) {
     theta = "-t 1.0"
 
   ## Assemble the full command
-    cmd = paste("./ms", sum(popList), nAlleles, theta, popInfo, "-T", paste(ejList, collapse=" "))
+    cmd = paste("ms", sum(popList), nAlleles, theta, popInfo, paste(ejList, collapse=" "), "-T")
+    # EXAMPLE OUTPUT: ms <nsam> 10 -t 1.0 -I 4 <pop1> <pop2> <pop3> 1 
+    #                 -ej <tau2> 2 1 -ej <tau1> 3 1 -ej <tau3> 4 1 -T
 
 return(cmd)
 }
