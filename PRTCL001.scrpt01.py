@@ -2,7 +2,7 @@
 '''PROTOCOL 001 - script 01'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.09.07.1900"
+__version__ = "2014.09.07.2100"
 __status__ = "Working"
 
 
@@ -26,8 +26,10 @@ from termcolor import colored
 def main(msCmd, inTree):
 
 # Get pop info from commandline
+    # read commands
+    handle = open(msCmd).read()
     # extract relevant section
-    popLst = GSO.exstr(msCmd, "-I", "-")
+    popLst = GSO.exstr(handle, "-I", "-")
     # remove leading and trailing whitespaces, make into list
     popLst = popLst.lstrip().rstrip().split()
     # remove:   first element (merely number of pops, not size)
@@ -38,6 +40,8 @@ def main(msCmd, inTree):
     lttrs = map(chr, range(97, 123))
     # remove "o" from list
     lttrs.remove("o")
+    # add a zero element to the beginning of lttrs
+    lttrs = ["0"] + lttrs
     # Initializations
     Sum = 0
     replaceDict = {}
@@ -76,8 +80,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-m',
                         '--mscmd',
-                        help='Command to Hudson`s ms',
-                        default="ms 21 10 -t 1.0 -I 5 5 5 5 5 1 -ej 3 5 1 -ej 2 4 1 -ej 1 2 1 -ej 1 3 4 -T",
+                        help='name of mscmd file',
+                        default="msCmd.txt",
                         required=True)
 
     parser.add_argument('-t',
@@ -90,6 +94,5 @@ if __name__ == '__main__':
 
 main(args.mscmd, args.tree)
 
-print ""
 print colored("    Done.", 'cyan')
 print ""

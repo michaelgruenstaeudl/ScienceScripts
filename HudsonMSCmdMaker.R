@@ -10,7 +10,7 @@
   #print(variable)
   #cat("\n***DEGUB - END***\n\n")
 
-makeHudsonMSCmd = function(spTree, popSize=5, nAlleles=10) {
+makeHudsonMSCmd = function(spTree, popSize=5, nAlleles=1) {
 
   # Description:    Generating gene trees via Hudson's ms   
   # Dependencies:   -
@@ -59,7 +59,7 @@ makeHudsonMSCmd = function(spTree, popSize=5, nAlleles=10) {
     # and fill them with popsize=5
     popList = rep(popSize, length(spTree$tip.label))
     # Give column names to list entries
-    names(popList) = paste("pop", 1:length(spTree$tip.label), sep="")
+    names(popList) = paste("pop", 1:length(tree$tip.label), sep="")
     # Last list entry constitutes outgroup; hence, give it popsize=1
     popList[length(popList)] = 1
 

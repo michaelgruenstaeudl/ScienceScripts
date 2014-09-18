@@ -13,8 +13,8 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script that wraps the commands necessary to perform a posterior predictive checking of the coalescent model"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.08.27.2300"
-USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
+VERSION="2014.09.17.2300"
+USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_outdir> <abs_path_to_scrptdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
 
 ################################################################################
 
@@ -27,22 +27,23 @@ echo ""
 
 ABS_PATH_TO_INDIR=$1
 ABS_PATH_TO_OUTDIR=$2
-ABS_PATH_TO_MS=$3
-XML_INFILENAME=$4
-NREPS_FLAG=$5
-DEBUG_FLAG=$6
+ABS_PATH_TO_SCRIPTDIR=$3
+ABS_PATH_TO_MS=$4
+XML_INFILENAME=$5
+NREPS_FLAG=$6
+DEBUG_FLAG=$7
 
 # Using Parameter expansion to remove file extension
 INFILE=${XML_INFILENAME%.xml*}
 #DATE=$(date +%Y-%b-%d)
 
 # Checking number of arguments
-if [[ $# != 6 ]]; then
+if [[ $# != 7 ]]; then
 	echo -e " ${red}ERROR: Incorrect number of arguments.${nocolor}"
 	exit
 fi
 
-for path in $ABS_PATH_TO_INDIR $ABS_PATH_TO_OUTDIR $ABS_PATH_TO_MS; do
+for path in $ABS_PATH_TO_INDIR $ABS_PATH_TO_OUTDIR $ABS_PATH_TO_SCRIPTDIR $ABS_PATH_TO_MS; do
 # Checking if directories exist
 if [ ! -d $path ]; then 
     echo -e " ${red}ERROR: Directory "$path" not found.${nocolor}"    
@@ -78,8 +79,8 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "source('/home/michael/git/Gruenstaeudl_PPS/P2C2M/wrapper.R')" > Rcmds.$INFILE.R
-echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME','$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
+echo "source('$ABS_PATH_TO_SCRIPTDIR/wrapper.R')" > Rcmds.$INFILE.R
+echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME', '$ABS_PATH_TO_SCRIPTDIR', '$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
 echo "warnings()" >> Rcmds.$INFILE.R
 echo "q()" >> Rcmds.$INFILE.R
 
