@@ -72,7 +72,7 @@ fi
 # STEP 2: Generating R commands for starBeastPPS analysis
 
 echo ""
-echo -e " ${blue}Analyzing $INFILE ...${nocolor}"
+echo -e " ${blue}<><><> Analyzing $INFILE <><><>${nocolor}"
 echo ""
 
 # Changing input directory
@@ -80,7 +80,7 @@ cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
 echo "source('$ABS_PATH_TO_SCRIPTDIR/wrapper.R')" > Rcmds.$INFILE.R
-echo "wrapper.go('$ABS_PATH_TO_INDIR','$XML_INFILENAME', '$ABS_PATH_TO_SCRIPTDIR', '$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
+echo "wrapper.init('$ABS_PATH_TO_INDIR','$XML_INFILENAME', '$ABS_PATH_TO_SCRIPTDIR', '$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
 echo "warnings()" >> Rcmds.$INFILE.R
 echo "q()" >> Rcmds.$INFILE.R
 
