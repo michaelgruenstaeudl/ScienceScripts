@@ -13,7 +13,7 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script that wraps the commands necessary to perform a posterior predictive checking of the coalescent model"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.09.19.2300"
+VERSION="2014.09.20.1400"
 USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_scrptdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
 
 ################################################################################
@@ -78,13 +78,21 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "source('$ABS_PATH_TO_SCRIPTDIR/wrapper.R')" > Rcmds.$INFILE.R
-echo "wrapper.init('$ABS_PATH_TO_INDIR','$XML_INFILENAME', '$ABS_PATH_TO_SCRIPTDIR', '$ABS_PATH_TO_MS', '$NREPS_FLAG', '$DEBUG_FLAG')" >> Rcmds.$INFILE.R
-echo "warnings()" >> Rcmds.$INFILE.R
-echo "q()" >> Rcmds.$INFILE.R
+echo "source('$ABS_PATH_TO_SCRIPTDIR/wrapper.R')" > $INFILE.P2C2M.Rcmds
+echo "wrapper.init( '$ABS_PATH_TO_INDIR', 
+                    '$XML_INFILENAME',
+                    '$ABS_PATH_TO_SCRIPTDIR',
+                    '$ABS_PATH_TO_MS',
+                    '$NREPS_FLAG',
+                    '$DEBUG_FLAG'   )" >> $INFILE.P2C2M.Rcmds
+echo "warnings()" >> $INFILE.P2C2M.Rcmds
+echo "q()" >> $INFILE.P2C2M.Rcmds
 
 # Executing commands in R with command args
-Rscript Rcmds.$INFILE.R
+Rscript $INFILE.P2C2M.Rcmds
+
+# Correction of .P2C2M.rslts.csv
+sed -i 's/"GTP\[2\]"/,"GTP\[2\]"/g' $INFILE.P2C2M.rslts.csv
 
 ################################################################################
 
@@ -94,12 +102,20 @@ echo ""
 echo -e " ${blue}Conducting file hygiene ...${nocolor}"
 echo ""
 
-tar czf $INFILE.PRMT.tar.gz $INFILE.PRMT
-rm $INFILE.PRMT Rcmds.*.R *.phyb
+tar czf $INFILE.P2C2M.prmt.R.tar.gz $INFILE.P2C2M.prmt.R
+rm $INFILE.P2C2M.prmt.R *.P2C2M.phyb
+
+# Check if folder "output" exists on previous level
+# Remember: Currently, you are in $ABS_PATH_TO_INDIR
+if [ ! -d ../output ]; then
+  mkdir ../output
+fi
+# Separate results from input data
+mv *.P2C2M.* ../output
 
 ################################################################################
 
 echo ""
-echo -e " ${green}--- End of Script ---${nocolor}"
+echo -e " ${green}~~~ End of Script ~~~${nocolor}"
 echo ""
 
