@@ -10,11 +10,11 @@ cyan='\e[0;36m'
 nocolor='\e[0m'
 
 TITLE="P2C2MWrapper.sh"
-DESCRIPTION="Shell script that wraps the commands necessary to perform a posterior predictive checking of the coalescent model"
+DESCRIPTION="Shell script for R package P2C2M"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.09.20.1400"
-USAGE="bash <this_script> <abs_path_to_indir> <abs_path_to_scrptdir> <abs_path_to_MS> <xml_infile> <nreps_flag(integer)> <debug_flag(T/F)>"
+VERSION="2014.09.21.2200"
+USAGE="bash <this_script> <abs_path_to_indir> <xml_infile> nReps=<nreps_flag(integer)>"
 
 ################################################################################
 
@@ -26,23 +26,20 @@ echo -e " ${yellow}Usage: $USAGE${nocolor}"
 echo ""
 
 ABS_PATH_TO_INDIR=$1
-ABS_PATH_TO_SCRIPTDIR=$2
-ABS_PATH_TO_MS=$3
-XML_INFILENAME=$4
-NREPS_FLAG=$5
-DEBUG_FLAG=$6
+XML_INFILENAME=$2
+NREPS_FLAG=$3
 
 # Using Parameter expansion to remove file extension
 INFILE=${XML_INFILENAME%.xml*}
 #DATE=$(date +%Y-%b-%d)
 
 # Checking number of arguments
-if [[ $# != 6 ]]; then
+if [[ $# != 3 ]]; then
 	echo -e " ${red}ERROR: Incorrect number of arguments.${nocolor}"
 	exit
 fi
 
-for path in $ABS_PATH_TO_INDIR $ABS_PATH_TO_SCRIPTDIR $ABS_PATH_TO_MS; do
+for path in $ABS_PATH_TO_INDIR; do
 # Checking if directories exist
 if [ ! -d $path ]; then 
     echo -e " ${red}ERROR: Directory "$path" not found.${nocolor}"    
@@ -78,18 +75,15 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "source('$ABS_PATH_TO_SCRIPTDIR/wrapper.R')" > $INFILE.P2C2M.Rcmds
-echo "wrapper.init( '$ABS_PATH_TO_INDIR', 
-                    '$XML_INFILENAME',
-                    '$ABS_PATH_TO_SCRIPTDIR',
-                    '$ABS_PATH_TO_MS',
-                    '$NREPS_FLAG',
-                    '$DEBUG_FLAG'   )" >> $INFILE.P2C2M.Rcmds
-echo "warnings()" >> $INFILE.P2C2M.Rcmds
-echo "q()" >> $INFILE.P2C2M.Rcmds
+echo "library('P2C2M')" > $INFILE.P2C2M.cmds.R
+echo "p2c2m.exec( '$ABS_PATH_TO_INDIR', 
+                  '$XML_INFILENAME',
+                  nreps='$NREPS_FLAG')" >> $INFILE.P2C2M.cmds.R
+echo "warnings()" >> $INFILE.P2C2M.cmds.R
+echo "q()" >> $INFILE.P2C2M.cmds.R
 
 # Executing commands in R with command args
-Rscript $INFILE.P2C2M.Rcmds
+Rscript $INFILE.P2C2M.cmds.R
 
 # Correction of .P2C2M.rslts.csv
 sed -i 's/"GTP\[2\]"/,"GTP\[2\]"/g' $INFILE.P2C2M.rslts.csv
@@ -103,7 +97,8 @@ echo -e " ${blue}Conducting file hygiene ...${nocolor}"
 echo ""
 
 tar czf $INFILE.P2C2M.prmt.R.tar.gz $INFILE.P2C2M.prmt.R
-rm $INFILE.P2C2M.prmt.R *.P2C2M.phyb
+rm $INFILE.P2C2M.prmt.R 
+#rm *.P2C2M.phyb
 
 # Check if folder "output" exists on previous level
 # Remember: Currently, you are in $ABS_PATH_TO_INDIR
