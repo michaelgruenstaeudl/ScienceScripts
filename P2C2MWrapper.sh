@@ -13,8 +13,8 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script for R package P2C2M"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.09.21.2200"
-USAGE="bash <this_script> <abs_path_to_indir> <xml_infile> nReps=<nreps_flag(integer)>"
+VERSION="2014.10.09.2300"
+USAGE="bash <this_script> <abs_path_to_indir> <xml.file> <num.reps> <use.mpi(T/F)>"
 
 ################################################################################
 
@@ -26,15 +26,15 @@ echo -e " ${yellow}Usage: $USAGE${nocolor}"
 echo ""
 
 ABS_PATH_TO_INDIR=$1
-XML_INFILENAME=$2
-NREPS_FLAG=$3
-
+XML_FILE=$2
+NUM_REPS=$3
+USE_MPI=$4
 # Using Parameter expansion to remove file extension
-INFILE=${XML_INFILENAME%.xml*}
+INFILE=${XML_FILE%.xml*}
 #DATE=$(date +%Y-%b-%d)
 
 # Checking number of arguments
-if [[ $# != 3 ]]; then
+if [[ $# != 4 ]]; then
 	echo -e " ${red}ERROR: Incorrect number of arguments.${nocolor}"
 	exit
 fi
@@ -58,7 +58,7 @@ fi
 done
 
 # Checking if input file exists
-if [ ! -f $ABS_PATH_TO_INDIR/$XML_INFILENAME ]; then 
+if [ ! -f $ABS_PATH_TO_INDIR/$XML_FILE ]; then 
     echo -e " ${red}ERROR: XML file not found.${nocolor}"    
     exit
 fi
@@ -68,49 +68,48 @@ fi
 # STEP 2: Generating R commands for starBeastPPS analysis
 
 echo ""
-echo -e " ${blue}~~~ Analyzing $INFILE ~~~${nocolor}"
+echo -e " ${blue}~~~ Start of $INFILE ~~~${nocolor}"
 echo ""
 
 # Changing input directory
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "library('P2C2M')" > $INFILE.P2C2M.cmds.R
-echo "p2c2m.exec( '$ABS_PATH_TO_INDIR', 
-                  '$XML_INFILENAME',
-                  nreps='$NREPS_FLAG')" >> $INFILE.P2C2M.cmds.R
-echo "warnings()" >> $INFILE.P2C2M.cmds.R
-echo "q()" >> $INFILE.P2C2M.cmds.R
+echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
+echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
+                                xml.file='$XML_FILE',
+                                num.reps=$NUM_REPS,
+                                use.mpi=$USE_MPI)" >> $INFILE.p2c2m.cmd.R
+echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
+#echo "warnings()" >> $INFILE.p2c2m.cmd.R
+echo "q()" >> $INFILE.p2c2m.cmd.R
 
 # Executing commands in R with command args
-Rscript $INFILE.P2C2M.cmds.R
-
-# Correction of .P2C2M.rslts.csv
-sed -i 's/"GTP\[2\]"/,"GTP\[2\]"/g' $INFILE.P2C2M.rslts.csv
+Rscript $INFILE.p2c2m.cmd.R
 
 ################################################################################
 
 # STEP 3: File hygiene
 
-echo ""
-echo -e " ${blue}Conducting file hygiene ...${nocolor}"
-echo ""
+#echo ""
+#echo -e " ${blue}Conducting file hygiene ...${nocolor}"
+#echo ""
 
-tar czf $INFILE.P2C2M.prmt.R.tar.gz $INFILE.P2C2M.prmt.R
-rm $INFILE.P2C2M.prmt.R 
-#rm *.P2C2M.phyb
+#tar czf $INFILE.P2C2M.prmt.R.tar.gz $INFILE.P2C2M.prmt.R
+#rm $INFILE.P2C2M.prmt.R 
+##rm *.P2C2M.phyb
 
-# Check if folder "output" exists on previous level
-# Remember: Currently, you are in $ABS_PATH_TO_INDIR
-if [ ! -d ../output ]; then
-  mkdir ../output
-fi
-# Separate results from input data
-mv *.P2C2M.* ../output
+## Check if folder "output" exists on previous level
+## Remember: Currently, you are in $ABS_PATH_TO_INDIR
+#if [ ! -d ../output ]; then
+#  mkdir ../output
+#fi
+## Separate results from input data
+#mv *.P2C2M.* ../output
 
 ################################################################################
 
 echo ""
-echo -e " ${green}~~~ End of Script ~~~${nocolor}"
+echo -e " ${green}~~~ End of $INFILE ~~~${nocolor}"
 echo ""
 
