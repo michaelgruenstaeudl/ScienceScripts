@@ -13,7 +13,7 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script for R package P2C2M"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.10.09.2300"
+VERSION="2014.10.22.2000"
 USAGE="bash <this_script> <abs_path_to_indir> <xml.file> <num.reps> <use.mpi(T/F)>"
 
 ################################################################################
@@ -75,13 +75,16 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
+echo "options(warn=2, error=recover, verbose=TRUE)" > $INFILE.p2c2m.cmd.R
+echo "library(P2C2M)" >> $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
+                                descr.stats='GSI,GTP,NDC,RAY',
                                 num.reps=$NUM_REPS,
-                                use.mpi=$USE_MPI)" >> $INFILE.p2c2m.cmd.R
+                                use.mpi=$USE_MPI,
+                                verbose=TRUE)" >> $INFILE.p2c2m.cmd.R
 echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
-#echo "warnings()" >> $INFILE.p2c2m.cmd.R
+echo "warnings()" >> $INFILE.p2c2m.cmd.R
 echo "q()" >> $INFILE.p2c2m.cmd.R
 
 # Executing commands in R with command args
@@ -107,6 +110,19 @@ Rscript $INFILE.p2c2m.cmd.R
 ## Separate results from input data
 #mv *.P2C2M.* ../output
 
+################################################################################
+# EXAMPLE INSTALLATION
+#install.packages("P2C2M", dependencies = c("Depends", "Suggests"))
+
+# EXAMPLE EXECUTION
+#nohup sh -c '
+#for dir in $(ls -d sim* | sort -n -k 1.5); do
+#time1=$(date +%Y.%m.%d.%H:%M:%S);
+#bash /home/mgruenstaeudl/P2C2MWrapper.sh $(pwd)/$dir/ $dir.xml 100 T;
+#time2=$(date +%Y.%m.%d.%H:%M:%S);
+#echo "Start time: $time1" >${dir%.xml*}.timelog;
+#echo "Stop time:  $time2" >>${dir%.xml*}.timelog;
+#done ' &
 ################################################################################
 
 echo ""
