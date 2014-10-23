@@ -75,8 +75,8 @@ echo ""
 cd $ABS_PATH_TO_INDIR
 
 # Generating R commands
-echo "options(warn=2, error=recover, verbose=TRUE)" > $INFILE.p2c2m.cmd.R
-echo "library(P2C2M)" >> $INFILE.p2c2m.cmd.R
+#echo "options(warn=2, error=recover, verbose=TRUE)" > $INFILE.p2c2m.cmd.R
+echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
                                 descr.stats='GSI,GTP,NDC,RAY',
@@ -84,7 +84,7 @@ echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR',
                                 use.mpi=$USE_MPI,
                                 verbose=TRUE)" >> $INFILE.p2c2m.cmd.R
 echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
-echo "warnings()" >> $INFILE.p2c2m.cmd.R
+#echo "warnings()" >> $INFILE.p2c2m.cmd.R
 echo "q()" >> $INFILE.p2c2m.cmd.R
 
 # Executing commands in R with command args
