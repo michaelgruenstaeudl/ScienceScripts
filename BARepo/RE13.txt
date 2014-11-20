@@ -1,3 +1,0 @@
-				<uniformPrior lower="0.0" upper="1.0">
-					<parameter idref="gene_NN.frequencies"/>
-				</uniformPrior>

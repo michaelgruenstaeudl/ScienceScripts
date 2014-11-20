@@ -1,1 +1,0 @@
-			<treeLikelihood idref="gene_NN.treeLikelihood"/>

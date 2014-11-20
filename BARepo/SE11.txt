@@ -1,8 +1,0 @@
-				<oneOnXPrior>
-					<parameter idref="species.popMean"/>
-				</oneOnXPrior>
-				<oneOnXPrior>
-					<parameter idref="species.yule.birthRate"/>
-				</oneOnXPrior>
-			</prior>
-			<likelihood id="likelihood">

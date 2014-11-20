@@ -1,3 +1,0 @@
-        <scaleOperator scaleFactor="0.75" weight="3">
-            <parameter idref="constant.popSize"/>
-        </scaleOperator>

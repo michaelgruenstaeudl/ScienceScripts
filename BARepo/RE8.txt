@@ -1,3 +1,0 @@
-		<deltaExchange delta="0.01" weight="0.1">
-			<parameter idref="gene_NN.frequencies"/>
-		</deltaExchange>

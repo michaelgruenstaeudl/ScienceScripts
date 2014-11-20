@@ -79,9 +79,11 @@ cd $ABS_PATH_TO_INDIR
 echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
-                                descr.stats='GSI,GTP,NDC,RAY',
+#                                descr.stats='GSI,GTP,NDC,RAY',
+                               	descr.stats='RAY',
                                 num.reps=$NUM_REPS,
                                 use.mpi=$USE_MPI,
+                                use.sorted=TRUE,
                                 verbose=TRUE)" >> $INFILE.p2c2m.cmd.R
 echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
 #echo "warnings()" >> $INFILE.p2c2m.cmd.R
@@ -118,7 +120,7 @@ Rscript $INFILE.p2c2m.cmd.R
 #nohup sh -c '
 #for dir in $(ls -d sim* | sort -n -k 1.5); do
 #time1=$(date +%Y.%m.%d.%H:%M:%S);
-#bash /home/mgruenstaeudl/P2C2MWrapper.sh $(pwd)/$dir/ $dir.xml 100 T;
+#bash /home/mgruenstaeudl/P2C2MWrapper.sh $(pwd)/$dir/ $dir.xml 100 F;
 #time2=$(date +%Y.%m.%d.%H:%M:%S);
 #echo "Start time: $time1" >${dir%.xml*}.timelog;
 #echo "Stop time:  $time2" >>${dir%.xml*}.timelog;
