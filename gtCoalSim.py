@@ -47,7 +47,7 @@ def main(n_sp, n_loci, alleles_per_sp):
 
 ## STEP 2b: Simulate the gene trees
     g_trees = []
-    for t in range(1, n_loci):
+    for t in range(0, n_loci):
         g_tree = dendropy.treesim.contained_coalescent(sp_tree, tsm_object)
         g_trees.append(g_tree.as_newick_string())
 
