@@ -2,7 +2,7 @@
 '''Gene tree simulation under the coalescent using DendroPy'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.12.31.2300"
+__version__ = "2014.01.02.2300"
 __status__ = "Working"
 
 
@@ -12,6 +12,7 @@ __status__ = "Working"
 
 import argparse
 import dendropy
+import numpy
 import sys
 from termcolor import colored
 
@@ -20,7 +21,7 @@ from termcolor import colored
 # MAIN #
 ########
 
-def main(n_sp, n_loci, alleles_per_sp):
+def main(n_sp, n_loci, alleles_per_sp, max_age):
 
 ## STEP 1: Simulate a population/species tree
 ## STEP 1a: Set up a taxon set
@@ -35,11 +36,21 @@ def main(n_sp, n_loci, alleles_per_sp):
     taxon_names = "\n".join(tn_list)
     d.read_from_string(taxon_names, "dnafasta")
 
-## STEP 1b: Set up population sizes
+## STEP 1B: Set up age vector
+    ages = []
+    # Initializing age of the youngest divergence
+    min_age = 0
+    # Note: n_sp-1 actually means n_sp-2, because range doesn't count last
+    for divergence in range(1, n_sp-1):
+        min_age = float(numpy.random.uniform(min_age, max_age, 1))
+        ages.append(min_age)
+    ages.append(max_age)
+
+## STEP 1c: Set up population sizes
     ps = [1] * (n_sp * 2 + 1)
 
-## STEP 1c: Simulate the species tree
-    sp_tree = dendropy.treesim.pop_gen_tree(taxon_set=d.taxon_sets[0], pop_sizes=ps)
+## STEP 1d: Simulate the species tree
+    sp_tree = dendropy.treesim.pop_gen_tree(taxon_set=d.taxon_sets[0], ages=ages, pop_sizes=ps)
 
 ## STEP 2: Simulate a set of gene trees
 ## STEP 2a: Set up the TaxonSetMapping object
@@ -77,7 +88,8 @@ def main(n_sp, n_loci, alleles_per_sp):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Gene tree simulation under the coalescent \
-                     using DendroPy; 2014 Michael Gruenstaeudl')
+                     using DendroPy; 2015 Michael Gruenstaeudl \
+                     Usage: python2 ~/git/ScienceScripts/gtCoalSim.py > ~/Desktop/geneTrees.tre')
 
     parser.add_argument('-s',
                         '--n_sp',
@@ -91,15 +103,21 @@ if __name__ == '__main__':
                         default=5,
                         required=False)
 
-    parser.add_argument('-a',
+    parser.add_argument('-p',
                         '--alleles_per_sp',
                         help='number of alleles per species',
                         default=10,
                         required=False)
 
+    parser.add_argument('-a',
+                        '--max_age',
+                        help='age of the oldest divergence (in generations)',
+                        default=40,
+                        required=False)
+
     args = parser.parse_args()
 
-main(args.n_sp, args.n_loci, args.alleles_per_sp)
+main(args.n_sp, args.n_loci, args.alleles_per_sp, args.max_age)
 
 #print ""
 #print colored("    Done.", 'cyan')
