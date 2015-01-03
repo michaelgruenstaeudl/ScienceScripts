@@ -88,8 +88,8 @@ def main(n_sp, n_loci, alleles_per_sp, max_age):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Gene tree simulation under the coalescent \
-                     using DendroPy; 2015 Michael Gruenstaeudl \
-                     Usage: python2 ~/git/ScienceScripts/gtCoalSim.py > ~/Desktop/geneTrees.tre')
+                     using DendroPy; 2015 Michael Gruenstaeudl; \
+                     Example Usage: python2 ~/git/ScienceScripts/gtCoalSim.py > ~/Desktop/geneTrees.tre')
 
     parser.add_argument('-s',
                         '--n_sp',
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-main(args.n_sp, args.n_loci, args.alleles_per_sp, args.max_age)
+main(int(args.n_sp), int(args.n_loci), int(args.alleles_per_sp), int(args.max_age))
 
 #print ""
 #print colored("    Done.", 'cyan')
