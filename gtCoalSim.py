@@ -2,7 +2,7 @@
 '''Gene tree simulation under the coalescent using DendroPy'''
 __author__ = "Michael Gruenstaeudl, PhD"
 __email__ = "gruenstaeudl.1@osu.edu"
-__version__ = "2014.01.02.2300"
+__version__ = "2014.01.05.1200"
 __status__ = "Working"
 
 
@@ -21,7 +21,7 @@ from termcolor import colored
 # MAIN #
 ########
 
-def main(n_sp, n_loci, alleles_per_sp, max_age):
+def main(n_sp, n_loci, alleles_per_sp, max_age, output_type):
 
 ## STEP 1: Simulate a population/species tree
 ## STEP 1a: Set up a taxon set
@@ -37,13 +37,9 @@ def main(n_sp, n_loci, alleles_per_sp, max_age):
     d.read_from_string(taxon_names, "dnafasta")
 
 ## STEP 1B: Set up age vector
-    ages = []
-    # Initializing age of the youngest divergence
-    min_age = 0
-    # Note: n_sp-1 actually means n_sp-2, because range doesn't count last
-    for divergence in range(1, n_sp-1):
-        min_age = float(numpy.random.uniform(min_age, max_age, 1))
-        ages.append(min_age)
+    ages = list(numpy.random.uniform(0, max_age, size=n_sp-1))
+    # Sort the ages (this is critical to get an independent sample!)
+    ages = sorted(ages, key=int)
     ages.append(max_age)
 
 ## STEP 1c: Set up population sizes
@@ -51,6 +47,9 @@ def main(n_sp, n_loci, alleles_per_sp, max_age):
 
 ## STEP 1d: Simulate the species tree
     sp_tree = dendropy.treesim.pop_gen_tree(taxon_set=d.taxon_sets[0], ages=ages, pop_sizes=ps)
+    if output_type == 2|3:
+        print("# SPECIES TREE")
+        print(sp_tree.as_newick_string() + ";")
 
 ## STEP 2: Simulate a set of gene trees
 ## STEP 2a: Set up the TaxonSetMapping object
@@ -71,9 +70,11 @@ def main(n_sp, n_loci, alleles_per_sp, max_age):
 #    outfile.close()
 
 ## STEP 3: Print gene trees to screen
-    out_str = ";\n".join(g_trees) + ";"
-    out_str = out_str.replace("_", "")
-    print(out_str)
+    if output_type == 1|3:
+        print("# GENE TREES")
+        gt_out_str = ";\n".join(g_trees) + ";"
+        gt_out_str = gt_out_str.replace("_", "")
+        print(gt_out_str)
 
 ###########
 # EXECUTE #
@@ -115,9 +116,15 @@ if __name__ == '__main__':
                         default=40,
                         required=False)
 
+    parser.add_argument('-o',
+                        '--output_type',
+                        help='1 = gene trees only; 2 = species tree only; 3 = gene and species trees',
+                        default=3,
+                        required=False)
+
     args = parser.parse_args()
 
-main(int(args.n_sp), int(args.n_loci), int(args.alleles_per_sp), int(args.max_age))
+main(int(args.n_sp), int(args.n_loci), int(args.alleles_per_sp), int(args.max_age), int(args.output_type))
 
 #print ""
 #print colored("    Done.", 'cyan')
