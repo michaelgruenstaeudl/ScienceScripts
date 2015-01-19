@@ -47,7 +47,7 @@ def main(n_sp, n_loci, alleles_per_sp, max_age, output_type):
 
 ## STEP 1d: Simulate the species tree
     sp_tree = dendropy.treesim.pop_gen_tree(taxon_set=d.taxon_sets[0], ages=ages, pop_sizes=ps)
-    if output_type == 2|3:
+    if output_type == 2 or output_type == 3:
         print("# SPECIES TREE")
         print(sp_tree.as_newick_string() + ";")
 
@@ -70,7 +70,7 @@ def main(n_sp, n_loci, alleles_per_sp, max_age, output_type):
 #    outfile.close()
 
 ## STEP 3: Print gene trees to screen
-    if output_type == 1|3:
+    if output_type == 1 or output_type == 3:
         print("# GENE TREES")
         gt_out_str = ";\n".join(g_trees) + ";"
         gt_out_str = gt_out_str.replace("_", "")

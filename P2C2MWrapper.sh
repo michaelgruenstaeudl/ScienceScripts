@@ -79,8 +79,7 @@ cd $ABS_PATH_TO_INDIR
 echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
-#                                descr.stats='GSI,GTP,NDC,RAY',
-                               	descr.stats='RAY',
+                                descr.stats='GSI,GTP,NDC,RAY',
                                 num.reps=$NUM_REPS,
                                 use.mpi=$USE_MPI,
                                 use.sorted=TRUE,
