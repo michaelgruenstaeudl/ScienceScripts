@@ -25,7 +25,7 @@ for elem in handle:
     out_handle = elem.split("\n")[0]
     
     if len(values) == 0:
-        print("Error: " + relevant_info)
+        print("Error: " + out_handle)
     else:
         keyval = values.index(min(values))
         tmp_data = out_handle.split("_")
