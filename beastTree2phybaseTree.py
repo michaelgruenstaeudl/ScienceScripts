@@ -14,7 +14,7 @@ import argparse
 import dendropy
 import numpy
 import sys
-sys.path.insert(0,"/home/michael/git/ScienceScripts/")
+sys.path.insert(0,"/home/michael/git/github.com_ScienceScripts/")
 import GeneralStringOperations as GSO
 
 ########################
