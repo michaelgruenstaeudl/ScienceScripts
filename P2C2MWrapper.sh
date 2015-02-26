@@ -13,7 +13,7 @@ TITLE="P2C2MWrapper.sh"
 DESCRIPTION="Shell script for R package P2C2M"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="gruenstaeudl.1@osu.edu"
-VERSION="2014.10.22.2000"
+VERSION="2015.02.25.2100"
 USAGE="bash <this_script> <abs_path_to_indir> <xml.file> <num.reps> <use.mpi(T/F)>"
 
 ################################################################################
@@ -79,10 +79,11 @@ cd $ABS_PATH_TO_INDIR
 echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
-                                descr.stats='GSI,GTP,NDC,RAY',
+                                descr.stats='COAL_LIU,COAL_REID,GSI,NDC',
                                 num.reps=$NUM_REPS,
                                 use.mpi=$USE_MPI,
-                                use.sorted=TRUE,
+                                use.sorted=FALSE,
+                                save.metadata=TRUE,
                                 verbose=TRUE)" >> $INFILE.p2c2m.cmd.R
 echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
 #echo "warnings()" >> $INFILE.p2c2m.cmd.R
