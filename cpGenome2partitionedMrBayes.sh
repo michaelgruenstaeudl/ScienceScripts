@@ -232,8 +232,8 @@ echo -ne " ${blue} Step 3: Conducting modeltesting via jModelTest2 ... ${nocolor
 
 # Generating a Python script that adds partition info to NEXUS file
 for ds in $(ls partition*); do 
-java -jar $MODELTEST -d $ds -g 4 -i -f -AIC -o $ds.bestModel 1>$ds.bestModel.log 2>$ds.bestModel.err &; 
-spinner $!;
+java -jar $MODELTEST -d $ds -g 4 -i -f -AIC -o $ds.bestModel & 1>$ds.bestModel.log 2>$ds.bestModel.err ;
+spinner $! ;
 done
 
 # Extract model information from files
