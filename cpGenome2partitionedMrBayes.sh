@@ -170,6 +170,8 @@ q()
 Rscript ParsePartitionInfo.R $ANNOTATIONS &
 spinner $!
 
+sleep 5
+
 # Add missing column name
 sed -i 's/\"\"\,\"Start\"/\"Name\"\,\"Start\"/' $ANNOTATIONS.filtered
 
@@ -218,6 +220,8 @@ exit()
 python2 SplitPartitions.py $ALIGNMENT $ANNOTATIONS.filtered &
 spinner $!
 
+sleep 5
+
 # Ordering the partitions by adding consecutive numbers
 n=1;
 for i in partition*; do 
@@ -250,6 +254,8 @@ if [ "$ONSERVER" = "F" ]; then
     spinner $! ;
     done
 fi
+
+sleep 5
 
 # Extract model information from files
 for ds in $(ls *.bestModel); do echo $ds >> model_overview.txt; cat $ds | grep -A1 ' Model selected:' | tail -n1 >> model_overview.txt; done
@@ -287,6 +293,7 @@ exit()
 # Executing Python script (and immediately thereafter the Bash spinner)
 python2 CombinePartitions.py &
 spinner $!
+sleep 5
 
 # Setting up lset specifications
 sed -i 's/\.nex \=//g' combined.nex
