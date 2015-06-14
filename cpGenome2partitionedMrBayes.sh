@@ -114,8 +114,11 @@ fi
 cp $ALIGNMENT 01_input
 cp $ANNOTATIONS 01_input
 
-sleep 1 &
-spinner $!
+if [ "$ONSERVER" = "F" ]; then
+    sleep 1 &
+    spinner $!
+fi
+
 
 ################################################################################
 
@@ -167,10 +170,13 @@ q()
 " > ParsePartitionInfo.R
 
 # Executing R script
-Rscript ParsePartitionInfo.R $ANNOTATIONS &
-spinner $!
-
-sleep 5
+if [ "$ONSERVER" = "T" ]; then
+    Rscript ParsePartitionInfo.R $ANNOTATIONS
+fi
+if [ "$ONSERVER" = "F" ]; then
+    Rscript ParsePartitionInfo.R $ANNOTATIONS &
+    spinner $!
+fi
 
 # Add missing column name
 sed -i 's/\"\"\,\"Start\"/\"Name\"\,\"Start\"/' $ANNOTATIONS.filtered
@@ -217,10 +223,13 @@ exit()
 " > SplitPartitions.py
 
 # Executing Python script (and immediately thereafter the Bash spinner)
-python2 SplitPartitions.py $ALIGNMENT $ANNOTATIONS.filtered &
-spinner $!
-
-sleep 5
+if [ "$ONSERVER" = "T" ]; then
+    python2 SplitPartitions.py $ALIGNMENT $ANNOTATIONS.filtered
+fi
+if [ "$ONSERVER" = "F" ]; then
+    python2 SplitPartitions.py $ALIGNMENT $ANNOTATIONS.filtered &
+    spinner $!
+fi
 
 # Ordering the partitions by adding consecutive numbers
 n=1;
@@ -244,8 +253,7 @@ echo -ne " ${blue} Step 3: Conducting modeltesting via jModelTest2 ... ${nocolor
 # Generating a Python script that adds partition info to NEXUS file
 if [ "$ONSERVER" = "T" ]; then
     for ds in $(ls partition*); do 
-    java -jar $MODELTEST -tr $SLURM_NTASKS -d $ds -g 4 -i -f -AIC -o $ds.bestModel 1>$ds.bestModel.log 2>&1 &
-    spinner $! ;
+    java -jar $MODELTEST -tr $SLURM_NTASKS -d $ds -g 4 -i -f -AIC -o $ds.bestModel 1>$ds.bestModel.log 2>&1 ;
     done
 fi
 if [ "$ONSERVER" = "F" ]; then
@@ -254,8 +262,6 @@ if [ "$ONSERVER" = "F" ]; then
     spinner $! ;
     done
 fi
-
-sleep 5
 
 # Extract model information from files
 for ds in $(ls *.bestModel); do echo $ds >> model_overview.txt; cat $ds | grep -A1 ' Model selected:' | tail -n1 >> model_overview.txt; done
@@ -291,9 +297,14 @@ exit()
 " > CombinePartitions.py
 
 # Executing Python script (and immediately thereafter the Bash spinner)
-python2 CombinePartitions.py &
-spinner $!
-sleep 5
+if [ "$ONSERVER" = "T" ]; then
+    python2 CombinePartitions.py
+fi
+if [ "$ONSERVER" = "F" ]; then
+    python2 CombinePartitions.py &
+    spinner $!
+fi
+
 
 # Setting up lset specifications
 sed -i 's/\.nex \=//g' combined.nex
