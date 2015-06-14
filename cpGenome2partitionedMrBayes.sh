@@ -31,8 +31,9 @@ TITLE="cpGenome2partitionedMrBayes.sh"
 DESCRIPTION="Shell script to convert annotated cp genome to partitioned MrBayes analysis"
 AUTHOR="Michael Gruenstaeudl, PhD"
 CONTACT="mi.gruenstaeudl@gmail.com"
-VERSION="2015.06.14.2300"
-USAGE="bash <this_script> <alignment.nex> <annotations.csv> <path_to_modeltest.jar>"
+VERSION="2015.06.14.1800"
+USAGE="bash <this_script> <alignment.nex> <annotations.csv> <path_to_modeltest.jar> <on_server_with_slurm(T/F)>"
+DEPENDENCIES="R, python2, biopython, jModelTest2"
 
 ################################################################################
 
@@ -42,18 +43,20 @@ echo ""
 echo -e " ${green}Title: $TITLE | Version: $VERSION | Author: $AUTHOR${nocolor}"
 echo -e " ${green}Description: $DESCRIPTION${nocolor}"
 echo -e " ${yellow}Usage: $USAGE${nocolor}"
+echo -e " ${yellow}Dependencies: $DEPENDENCIES${nocolor}"
 echo ""
 echo -ne " ${blue} Step 0: Checking files ... ${nocolor}"
 
 ALIGNMENT=$1
 ANNOTATIONS=$2
 MODELTEST=$3 # /home/michael/binaries/jModelTest_2.1.7/jModelTest.jar
+ONSERVER=$4
 
 # Using Parameter expansion to remove file extension
 INFILE=${ALIGNMENT%.nex*}
 
 # Checking number of arguments
-if [[ $# != 3 ]]; then
+if [[ $# != 4 ]]; then
     echo -e " ${red}ERROR: Incorrect number of arguments.${nocolor}"
     exit
 fi
@@ -87,6 +90,10 @@ if [ ! -f $ANNOTATIONS ]; then
 fi
 if [ ! -f $MODELTEST ]; then 
     echo -e " ${red}ERROR: File not found: $MODELTEST${nocolor}"
+    exit
+fi
+if [ ! $ONSERVER ]; then 
+    echo -e " ${red}ERROR: No specification if run on server${nocolor}"
     exit
 fi
 
@@ -231,10 +238,18 @@ echo ""
 echo -ne " ${blue} Step 3: Conducting modeltesting via jModelTest2 ... ${nocolor}"
 
 # Generating a Python script that adds partition info to NEXUS file
-for ds in $(ls partition*); do 
-java -jar $MODELTEST -d $ds -g 4 -i -f -AIC -o $ds.bestModel & 1>$ds.bestModel.log 2>$ds.bestModel.err ;
-spinner $! ;
-done
+if [ "$ONSERVER" = "T" ]; then
+    for ds in $(ls partition*); do 
+    java -jar $MODELTEST -tr $SLURM_NTASKS -d $ds -g 4 -i -f -AIC -o $ds.bestModel 1>$ds.bestModel.log 2>&1 &
+    spinner $! ;
+    done
+fi
+if [ "$ONSERVER" = "F" ]; then
+    for ds in $(ls partition*); do 
+    java -jar $MODELTEST -d $ds -g 4 -i -f -AIC -o $ds.bestModel 1>$ds.bestModel.log 2>&1 &
+    spinner $! ;
+    done
+fi
 
 # Extract model information from files
 for ds in $(ls *.bestModel); do echo $ds >> model_overview.txt; cat $ds | grep -A1 ' Model selected:' | tail -n1 >> model_overview.txt; done
@@ -242,7 +257,6 @@ for ds in $(ls *.bestModel); do echo $ds >> model_overview.txt; cat $ds | grep -
 # Make backup of this step
 cp *.bestModel 02_process/
 mv *.bestModel.log 02_process/
-mv *.bestModel.err 02_process/
 cp model_overview.txt 02_process/
 
 ################################################################################
@@ -279,26 +293,26 @@ sed -i 's/\.nex \=//g' combined.nex
 sed -i ':a;N;$!ba;s/\.nex\.bestModel\n/\)/g' model_overview.txt
 sed -i ':a;N;$!ba;s/\.nex\.bestModel/\)/g' model_overview.txt
 
-sed -i 's/Model \= F81\+I\+G/nst\=1 rates\=invgamma\;/' model_overview.txt
-sed -i 's/Model \= JC\+I\+G/nst\=1 rates\=invgamma\;/' model_overview.txt
-sed -i 's/Model \= K80\+I\+G/nst\=2 rates\=invgamma\;/' model_overview.txt
-sed -i 's/Model \= HKY\+I\+G/nst\=2 rates\=invgamma\;/' model_overview.txt
-sed -i 's/Model \= SYM\+I\+G/nst\=6 rates\=invgamma\;/' model_overview.txt
-sed -i 's/Model \= GTR\+I\+G/nst\=6 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= F81+I+G/nst\=1 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= JC+I+G/nst\=1 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= K80+I+G/nst\=2 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= HKY+I+G/nst\=2 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= SYM+I+G/nst\=6 rates\=invgamma\;/' model_overview.txt
+sed -i 's/Model \= GTR+I+G/nst\=6 rates\=invgamma\;/' model_overview.txt
 
-sed -i 's/Model \= F81\+G/nst\=1 rates\=gamma\;/' model_overview.txt
-sed -i 's/Model \= JC\+G/nst\=1 rates\=gamma\;/' model_overview.txt
-sed -i 's/Model \= K80\+G/nst\=2 rates\=gamma\;/' model_overview.txt
-sed -i 's/Model \= HKY\+G/nst\=2 rates\=gamma\;/' model_overview.txt
-sed -i 's/Model \= SYM\+G/nst\=6 rates\=gamma\;/' model_overview.txt
-sed -i 's/Model \= GTR\+G/nst\=6 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= F81+G/nst\=1 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= JC+G/nst\=1 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= K80+G/nst\=2 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= HKY+G/nst\=2 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= SYM+G/nst\=6 rates\=gamma\;/' model_overview.txt
+sed -i 's/Model \= GTR+G/nst\=6 rates\=gamma\;/' model_overview.txt
 
-sed -i 's/Model \= F81\+I/nst\=1 rates\=propinv\;/' model_overview.txt
-sed -i 's/Model \= JC\+I/nst\=1 rates\=propinv\;/' model_overview.txt
-sed -i 's/Model \= K80\+I/nst\=2 rates\=propinv\;/' model_overview.txt
-sed -i 's/Model \= HKY\+I/nst\=2 rates\=propinv\;/' model_overview.txt
-sed -i 's/Model \= SYM\+I/nst\=6 rates\=propinv\;/' model_overview.txt
-sed -i 's/Model \= GTR\+I/nst\=6 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= F81+I/nst\=1 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= JC+I/nst\=1 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= K80+I/nst\=2 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= HKY+I/nst\=2 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= SYM+I/nst\=6 rates\=propinv\;/' model_overview.txt
+sed -i 's/Model \= GTR+I/nst\=6 rates\=propinv\;/' model_overview.txt
 
 sed -i 's/Model \= F81/nst\=1\;/' model_overview.txt
 sed -i 's/Model \= JC/nst\=1\;/' model_overview.txt
@@ -323,8 +337,7 @@ sed -i ':a;N;$!ba;s/\; charset/\;\ncharset/g' combined.nex
 echo -n 'partition combined = ' >> combined.nex
 echo -n $(cat combined.nex | grep charset | wc -l) >> combined.nex
 echo -n ': ' >> combined.nex
-cat combined.nex | grep charset | awk '{print $2}' | awk '{ 
-ORS=", "; print; }' >> combined.nex
+cat combined.nex | grep charset | awk '{print $2}' | awk '{ORS=", "; print; }' >> combined.nex
 echo ';' >> combined.nex
 sed -i 's/\, \;/\;/g' combined.nex
 echo 'set partition = combined;' >> combined.nex
@@ -334,7 +347,7 @@ echo 'mcmcp ngen=1000000 temp=0.1 samplefreq=10000; mcmc;' >> combined.nex
 echo 'END; QUIT;' >> combined.nex
 
 # Make backup of this step
-cp combined.nex 02_process/
+cp combined.nex 03_results/
 
 # File hygiene
 rm CombinePartitions.py
