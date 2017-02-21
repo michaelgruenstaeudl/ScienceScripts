@@ -79,12 +79,15 @@ cd $ABS_PATH_TO_INDIR
 echo "library(P2C2M)" > $INFILE.p2c2m.cmd.R
 echo "$INFILE <- p2c2m.complete(path='$ABS_PATH_TO_INDIR', 
                                 xml.file='$XML_FILE',
-                                descr.stats='COAL,NDC,LCWT',
+                                descr.stats='LCWT,NDC',
                                 num.reps=$NUM_REPS,
                                 use.mpi=$USE_MPI,
                                 use.sorted=FALSE,
                                 save.metadata=TRUE,
                                 verbose=TRUE)" >> $INFILE.p2c2m.cmd.R
+
+#                               descr.stats='COAL,NDC,LCWT'
+
 echo "save($INFILE, file='$INFILE.rda')" >> $INFILE.p2c2m.cmd.R
 #echo "warnings()" >> $INFILE.p2c2m.cmd.R
 echo "q()" >> $INFILE.p2c2m.cmd.R

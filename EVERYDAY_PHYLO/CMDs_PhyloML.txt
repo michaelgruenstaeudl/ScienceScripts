@@ -1,0 +1,36 @@
+#!/bin/bash
+
+INF=Nymphaeales_Alignment_Combined77CDS_2017.02.08.2100.phy
+
+################################################################################
+# Perform 1000 rapid Bootstrap searches, 100 ML searches and return the best   #
+# ML tree with support values                                                  #
+################################################################################
+raxmlHPC -s $INF -m GTRGAMMAI -p $(echo $RANDOM) -# 1000 -x $(echo $RANDOM) -f a -n thoroughMLrapidBS
+
+################################################################################
+# Perform 1000 rapid Bootstrap searches, 100 ML searches and return the best   #
+# ML tree with support values, using a PARTITIONED ALIGNMENT. Has to be        #
+# accompanied with a partition file (here: partitions.txt), which indicates    #
+# that partition p1 is a DNA partition (for which GTR+GAMMA+I will be used)    #
+# and that partition p2 is a binary partition (for which BIN+GAMMA+I) will be  #
+# used. Thus, column 1 of the partition file specifies the model, whereas      #
+# parameter -m is now only used to specify the rate heterogeneity parameters   #
+# to be estimated for all partitions.                                          #
+# > cat partitions.txt                                                         #
+# DNA, p1 = 1-2245                                                             #
+# BIN, p2 = 2246-2555                                                          #
+################################################################################
+raxmlHPC -s $INF -q partitions.txt -m GTRGAMMAI -p $(echo $RANDOM) -# 1000 -x $(echo $RANDOM) -f a -n thoroughMLrapidBS
+
+
+## Infer best tree for concatenated alignment
+#NUMTHREADS=4
+#raxmlHPC-PTHREADS -T $NUMTHREADS -m GTRGAMMAI -s $INF -n concat_unpart -N 100 -p $(echo $RANDOM) -n thoroughML
+raxmlHPC -s $INF -m GTRGAMMAI -p $(echo $RANDOM) -N 100 -n thoroughML
+
+## TIPPS: https://github.com/kbseah/phylogenomics-tools/blob/master/tree_calculations.pl
+## Writes the % of bipartitions found on set of all indiv gene trees onto the concat tree, much like a bootstrap
+#raxmlHPC -s $INF -m GTRGAMMAI -n bipartitions_write -t RAxML_bestTree.concat_unpart -z gene_trees_allset -f b
+## Draws an MRE consensus tree
+#raxmlHPC-PTHREADS -T $NUMTHREADS -m GTRGAMMAI -n consMRE -s $INF -J MRE -z gene_trees_allset

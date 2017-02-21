@@ -1,0 +1,14 @@
+#!/bin/bash
+
+INF=Nymphaeales_Alignment_Combined77CDS_2017.02.08.2100.nex
+OUTF=${INF%.nex*}.mrbayes
+
+BAYESBLOCK="
+BEGIN MRBAYES;\nset autoclose=yes;\nset nowarnings=yes;\nlset nst=6 rates=invgamma;\nmcmcp ngen=50000000 temp=0.1 samplefreq=10000;\nmcmc;\nEND;"
+
+cat $INF > $OUTF
+echo "" >> $OUTF
+echo -e $BAYESBLOCK >> $OUTF
+
+mb.3.2.5 -i $OUTF
+
